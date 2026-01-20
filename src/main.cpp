@@ -2,7 +2,9 @@
 // #include "bts7960.h"
 #include "SmileEVO24.h"
 #include "pid.h"
+extern "C"{
 #include "encoder.h"
+}
 #include <ps5Controller.h>
 
 Encoder_t encLeft;
@@ -81,6 +83,7 @@ void setup() {
 
 void loop(){
 
+    Drive_equation(ps5.LStickY(),ps5.LStickX(),Setpoint[0],Setpoint[1]);
     unsigned long currentMillis = millis();
     if (currentMillis - previousMillis >= interval) {
     // save the current time as the last time the action happened
@@ -102,10 +105,10 @@ void loop(){
     long delta_countL = Encoder_GetDelta(&encLeft);
     long delta_countR = Encoder_GetDelta(&encRight);
     delta_countR = - delta_countR;
-    float rpm_L = (delta_countL * (1000.0 / interval) * 60.0) / TPR;
-    float rpm_R = (delta_countR * (1000.0 / interval) * 60.0) / TPR;
+    float rpm_L = (delta_countL * (1000.0 / interval) * 60.0) / (TPR * 100);
+    float rpm_R = (delta_countR * (1000.0 / interval) * 60.0) / (TPR*100);
 
-    Drive_equation(ps5.LStickY(),ps5.LStickX(),Setpoint[0],Setpoint[1]);
+    
     Output[0] = PIDMortorL.compute(Setpoint[0],float(rpm_L));
     Output[1] = PIDMortorR.compute(Setpoint[1],float(rpm_R));
     
@@ -122,7 +125,7 @@ void loop(){
         Serial.print("rX: "); Serial.print(int(ps5.LStickX())); Serial.print("rY: ");Serial.println(int(ps5.LStickY()));
         Serial.print("Setpoint[0]: "); Serial.print(Setpoint[0],2);Serial.print("Setpoint[1]: "); Serial.println(Setpoint[1],2);
         Serial.print("Output[0]: "); Serial.print(Output[0],2);Serial.print("Output[1]: "); Serial.println(Output[1],2);
-        Serial.printf("encoder L: %ld, R: %ld\n", rpm_L, rpm_R);
+        Serial.printf("encoder L: %0.2f, R: %0.2f\n", rpm_L, rpm_R);
         }
     }
     // Motor_L.drive(int(Setpoint[0])*100);
