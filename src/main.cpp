@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <WiFi.h>
-#include <WiFiUdp.h>
+#include "AsyncUDP.h"   // ใช้ AsyncUDP เพื่อรับข้อมูลแบบ Event-driven (Zero Latency)
 #include <math.h>
 #include "bts7960.h"
 #include "encoder.h"
@@ -56,8 +56,8 @@ const char* WIFI_SSID = "swag_robot";
 const char* WIFI_PASSWORD = "0620355575";
 const int UDP_PORT = 8888;
 
-WiFiUDP udp;
-unsigned long lastUdpTime = 0;
+AsyncUDP udp;
+volatile unsigned long lastUdpTime = 0;
 const unsigned long UDP_TIMEOUT_MS = 500; 
 
 #pragma pack(push, 1)
@@ -71,7 +71,8 @@ struct ControlPacket {
 };
 #pragma pack(pop)
 
-ControlPacket currentCommand = {0, 0, 0, 0, 0, 0};
+// ใช้ volatile เพื่อความปลอดภัยเวลารับค่าข้าม Core
+volatile ControlPacket currentCommand = {0, 0, 0, 0, 0, 0};
 bool lastToggleState = false;
 
 // ==========================================
@@ -155,7 +156,7 @@ void ControlLoopTask(void *pvParameters) {
     // ตัวแปรสำหรับ Low-pass Filter ความเร็ว
     float filtered_v_L = 0;
     float filtered_v_R = 0;
-    const float LPF_ALPHA = 0.05; // กรองสัญญาณ (ค่า 0.0 - 1.0 ยิ่งน้อยยิ่งนิ่ง แต่ตอบสนองช้าลงนิดหน่อย)
+    const float LPF_ALPHA = 0.05; // กรองสัญญาณ (ค่า 0.0 - 1.0 ยิ่งน้อยยิ่งนิ่ง)
 
     while (true) {
         unsigned long currentMicros = micros();
@@ -252,7 +253,28 @@ void setup() {
         Serial.println("mDNS started: myrobot.local");
     }
 
-    udp.begin(UDP_PORT);
+    // --- ส่วนที่เปลี่ยนใหม่ (AsyncUDP Setup) ---
+    if (udp.listen(UDP_PORT)) {
+        Serial.printf("Listening on UDP port %d\n", UDP_PORT);
+        
+        // ฟังก์ชันนี้จะถูกเรียกอัตโนมัติ (บน Core 0) เมื่อมีข้อมูลเข้ามา
+        udp.onPacket([](AsyncUDPPacket packet) {
+            if (packet.length() == sizeof(ControlPacket)) {
+                // ก๊อปปี้ข้อมูลลง Struct ทันที
+                ControlPacket tempCmd;
+                memcpy(&tempCmd, packet.data(), sizeof(ControlPacket));
+                
+                currentCommand.v_req = tempCmd.v_req;
+                currentCommand.w_req = tempCmd.w_req;
+                currentCommand.btn_dpad = tempCmd.btn_dpad;
+                currentCommand.btn_cancel = tempCmd.btn_cancel;
+                currentCommand.btn_toggle_mode = tempCmd.btn_toggle_mode;
+                currentCommand.btn_reset = tempCmd.btn_reset;
+                
+                lastUdpTime = millis();
+            }
+        });
+    }
     
     BTS7960_Init(&motor_L);
     BTS7960_Init(&motor_R);
@@ -277,12 +299,7 @@ void loop() {
     // --- จัดการ I/O ทั้งหมดในลูปนี้ เพื่อไม่ให้กวน PID ---
     readCAN(); 
 
-    int packetSize = udp.parsePacket();
-    if (packetSize == sizeof(ControlPacket)) {
-        udp.read((char*)&currentCommand, sizeof(ControlPacket));
-        lastUdpTime = millis();
-    }
-
+    // Safety Timeout
     if (millis() - lastUdpTime > UDP_TIMEOUT_MS) {
         currentCommand.v_req = 0; currentCommand.w_req = 0;
         currentCommand.btn_dpad = 0; currentCommand.btn_cancel = 0;
@@ -347,8 +364,10 @@ void loop() {
     if (currentMillis - lastSerialPrintTime >= 100) {
         lastSerialPrintTime = currentMillis;
         const char* modeStr = isAutoDistance ? "DIST" : (autoMode ? "AUTO" : "MAN");
+        if (Serial.availableForWrite() > 0) {
         Serial.printf("[%s] TgtL:%.2f TgtR:%.2f RealL:%.2f RealR:%.2f Dist:%.2f\n", 
                       modeStr, current_setpoint_L, current_setpoint_R, 
                       current_meas_v_L, current_meas_v_R, totalDistance);
+        }
     }
 }
