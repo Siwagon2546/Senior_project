@@ -1,43 +1,12 @@
 #include <Arduino.h>
+#include <WiFi.h>
+#include <WiFiUdp.h>
 #include <math.h>
 #include "bts7960.h"
 #include "encoder.h"
 #include "pid.h"
-
-// === Libraries ===
-#include <WiFi.h>
-#include <WiFiUdp.h>
-#include <Wire.h>
-#include <Adafruit_BNO08x.h>
-
-// === Network Settings ===
-const char* ssid = "YOUR_WIFI_SSID";
-const char* password = "YOUR_WIFI_PASSWORD";
-const char* hostIP = "10.42.0.1"; // IP ของ Ubuntu Hotspot
-const int udpPortTelemetry = 8889; // พอร์ตสำหรับส่งข้อมูลขึ้น ROS 2
-const int udpPortCommand = 8888;   // พอร์ตสำหรับรับคำสั่งจาก ROS 2
-
-WiFiUDP udpTelemetry;
-WiFiUDP udpCommand;
-
-// === โครงสร้างข้อมูล (Structs) ===
-struct __attribute__((packed)) RobotDataPacket {
-  float qI, qJ, qK, qReal; 
-  float gX, gY, gZ;        
-  float aX, aY, aZ;        
-  float vel_L, vel_R;      
-  float distance;          
-};
-RobotDataPacket robotData;
-
-struct __attribute__((packed)) CommandPacket {
-  float target_L;
-  float target_R;
-};
-CommandPacket cmdPacket;
-
-Adafruit_BNO08x bno08x;
-TaskHandle_t TaskIMU_UDP;
+#include "driver/twai.h" 
+#include <ESPmDNS.h>
 
 // ==========================================
 // 1. CONFIGURATION & PINS
@@ -46,35 +15,104 @@ BTS7960_t motor_L = { 22, 23, 255 };
 BTS7960_t motor_R = { 25, 26, 255 };
 Encoder_t encLeft, encRight;
 
-const float WHEEL_PPR = 16.0 * 99.5 ; 
+#define CAN_TX_PIN 5
+#define CAN_RX_PIN 4
+#define CAN_ID 0x100 
+
+const float WHEEL_PPR = 16.0 * 99.5; 
 const float WHEEL_RADIUS = 0.04;
 const float TRACK_WIDTH = 0.37;
 const float MAX_SPEED_MS = 0.3; 
-volatile float totalDistance = 0; 
+const float MAX_OMEGA = 1.2;
+volatile float totalDistance = 0; // ใช้ volatile เพราะแชร์ข้าม Task
 
-unsigned long moveStartTime = 0;
-float startWheelL = 0, startWheelR = 0;
-float targetWheelL = 0, targetWheelR = 0;
+// S-Curve Settings
+volatile unsigned long moveStartTime = 0;
+volatile float startWheelL = 0, startWheelR = 0;
+volatile float targetWheelL = 0, targetWheelR = 0;
 const double RAMP_DURATION = 1000.0; 
 
+// PID
 PID PIDMotorL(-255, 255, 1000.0, 0.0, 0.0); 
 PID PIDMotorR(-255, 255, 1000.0, 0.0, 0.0);
 
-// === ตัวแปร Global สำหรับแชร์ระหว่าง Core ===
-volatile float global_meas_v_L = 0;
-volatile float global_meas_v_R = 0;
-volatile float udp_target_L = 0;
-volatile float udp_target_R = 0;
+// Control States
+volatile bool autoMode = false; 
+volatile float Can_Target_L = 0, Can_Target_R = 0;
+volatile bool isAutoDistance = false;
+volatile float distanceTarget = 0;
+volatile float startDistance = 0;
 
-unsigned long lastCmdTime = 0;           
-const unsigned long CMD_TIMEOUT_MS = 500; 
+// Variables สำหรับการแสดงผล (แชร์จาก Control Task มาให้ Loop ปริ้นท์)
+volatile float current_meas_v_L = 0;
+volatile float current_meas_v_R = 0;
+volatile float current_setpoint_L = 0;
+volatile float current_setpoint_R = 0;
 
-unsigned long prevPidTime = 0;
-const long pidInterval = 3;
+// ==========================================
+// WIFI & UDP CONFIGURATION
+// ==========================================
+const char* WIFI_SSID = "swag_robot";
+const char* WIFI_PASSWORD = "0620355575";
+const int UDP_PORT = 8888;
+
+WiFiUDP udp;
+unsigned long lastUdpTime = 0;
+const unsigned long UDP_TIMEOUT_MS = 500; 
+
+#pragma pack(push, 1)
+struct ControlPacket {
+    float v_req;            
+    float w_req;            
+    uint8_t btn_dpad;       
+    uint8_t btn_cancel;     
+    uint8_t btn_toggle_mode;
+    uint8_t btn_reset;      
+};
+#pragma pack(pop)
+
+ControlPacket currentCommand = {0, 0, 0, 0, 0, 0};
+bool lastToggleState = false;
 
 // ==========================================
 // 2. HELPER FUNCTIONS
 // ==========================================
+void setupCAN() {
+    twai_general_config_t g_config = TWAI_GENERAL_CONFIG_DEFAULT((gpio_num_t)CAN_TX_PIN, (gpio_num_t)CAN_RX_PIN, TWAI_MODE_NORMAL);
+    twai_timing_config_t t_config = TWAI_TIMING_CONFIG_500KBITS();
+    twai_filter_config_t f_config = TWAI_FILTER_CONFIG_ACCEPT_ALL();
+    twai_driver_install(&g_config, &t_config, &f_config);
+    twai_start();
+    Serial.println("CAN BUS Started");
+}
+
+void readCAN() {
+    twai_message_t message;
+    if (twai_receive(&message, 0) == ESP_OK) { // Non-blocking
+        if (message.identifier == CAN_ID && message.data_length_code == 4) {
+            int16_t raw_L = (message.data[1] << 8) | message.data[0];
+            int16_t raw_R = (message.data[3] << 8) | message.data[2];
+            Can_Target_L = (float)raw_L / 100.0f;
+            Can_Target_R = (float)raw_R / 100.0f;
+        }
+    }
+}
+
+void sendDistanceCAN() {
+    twai_message_t message;
+    message.identifier = 0x101; 
+    message.extd = 0;           
+    message.data_length_code = 4; 
+
+    int32_t dist_cm = (int32_t)(totalDistance * 100.0f);
+    message.data[0] = dist_cm & 0xFF;
+    message.data[1] = (dist_cm >> 8) & 0xFF;
+    message.data[2] = (dist_cm >> 16) & 0xFF;
+    message.data[3] = (dist_cm >> 24) & 0xFF;
+
+    twai_transmit(&message, 0); // ไม่ต้องรอคิว ถ้ายุ่งให้ข้ามไปเลย
+}
+
 double SCurve(double t, double start, double delta_vel, double duration) {
     if (t >= duration) return start + delta_vel;
     t /= duration / 2.0;
@@ -83,121 +121,80 @@ double SCurve(double t, double start, double delta_vel, double duration) {
     return delta_vel / 2.0 * (t * t * t + 2.0) + start;
 }
 
-// ==========================================
-// 3. TASK บน Core 0 (จัดการ Wi-Fi, IMU, และ UDP ขาเข้า/ขาออก)
-// ==========================================
-void imuUdpTask(void * pvParameters) {
-    WiFi.begin(ssid, password);
-    while (WiFi.status() != WL_CONNECTED) {
-        vTaskDelay(500 / portTICK_PERIOD_MS);
-    }
-    
-    // ผูกพอร์ตสำหรับรับคำสั่งจาก ROS 2
-    udpCommand.begin(udpPortCommand);
+void processWifiInput() {
+    float v_req = currentCommand.v_req;
+    float w_req = currentCommand.w_req;
 
-    Wire.begin();
-    Wire.setClock(400000);
-    if (!bno08x.begin_I2C(0x4A)) { 
-        while (1) { vTaskDelay(10 / portTICK_PERIOD_MS); } 
-    }
-  
-    uint32_t reportIntervalUs = 9000; 
-    bno08x.enableReport(SH2_ROTATION_VECTOR, reportIntervalUs);
-    bno08x.enableReport(SH2_GYROSCOPE_CALIBRATED, reportIntervalUs);
-    bno08x.enableReport(SH2_ACCELEROMETER, reportIntervalUs);
+    if (v_req > MAX_SPEED_MS) v_req = MAX_SPEED_MS;
+    if (v_req < -MAX_SPEED_MS) v_req = -MAX_SPEED_MS;
+    if (w_req > MAX_OMEGA) w_req = MAX_OMEGA;
+    if (w_req < -MAX_OMEGA) w_req = -MAX_OMEGA;
 
-    sh2_SensorValue_t sensorValue;
+    float newTargetL = v_req - (w_req * TRACK_WIDTH / 2.0);
+    float newTargetR = v_req + (w_req * TRACK_WIDTH / 2.0);
+
+    if (newTargetL != targetWheelL || newTargetR != targetWheelR) {
+        startWheelL = targetWheelL; 
+        startWheelR = targetWheelR;
+        targetWheelL = newTargetL;
+        targetWheelR = newTargetR;
+        moveStartTime = millis();
+    }
+}
+
+// ==========================================
+// 3. 1000Hz CONTROL TASK (FreeRTOS)
+// ==========================================
+void ControlLoopTask(void *pvParameters) {
+    // กำหนดความถี่ลูป 1ms (1000Hz)
+    const TickType_t xFrequency = pdMS_TO_TICKS(1); 
     TickType_t xLastWakeTime = xTaskGetTickCount();
-    const TickType_t xFrequency = 5 / portTICK_PERIOD_MS; // 100Hz
+    
+    unsigned long prevMicros = micros();
+    
+    // ตัวแปรสำหรับ Low-pass Filter ความเร็ว
+    float filtered_v_L = 0;
+    float filtered_v_R = 0;
+    const float LPF_ALPHA = 0.05; // กรองสัญญาณ (ค่า 0.0 - 1.0 ยิ่งน้อยยิ่งนิ่ง แต่ตอบสนองช้าลงนิดหน่อย)
 
-    for(;;) {
-        // --- 1. รับคำสั่ง Setpoint จาก ROS 2 (Non-blocking) ---
-        int packetSize = udpCommand.parsePacket();
-        if (packetSize == sizeof(CommandPacket)) {
-            udpCommand.read((char*)&cmdPacket, sizeof(CommandPacket));
-            udp_target_L = cmdPacket.target_L;
-            udp_target_R = cmdPacket.target_R;
-            lastCmdTime = millis(); // อัปเดต Watchdog
-        }
+    while (true) {
+        unsigned long currentMicros = micros();
+        double dt = (currentMicros - prevMicros) / 1000000.0;
+        if (dt <= 0.0) dt = 0.001; // ป้องกันการหารด้วยศูนย์
+        prevMicros = currentMicros;
 
-        // --- 2. อ่านค่า IMU ---
-        while (bno08x.getSensorEvent(&sensorValue)) {
-            switch (sensorValue.sensorId) {
-                case SH2_ROTATION_VECTOR:
-                    robotData.qI = sensorValue.un.rotationVector.i;
-                    robotData.qJ = sensorValue.un.rotationVector.j;
-                    robotData.qK = sensorValue.un.rotationVector.k;
-                    robotData.qReal = sensorValue.un.rotationVector.real;
-                    break;
-                case SH2_GYROSCOPE_CALIBRATED:
-                    robotData.gX = sensorValue.un.gyroscope.x;
-                    robotData.gY = sensorValue.un.gyroscope.y;
-                    robotData.gZ = sensorValue.un.gyroscope.z;
-                    break;
-                case SH2_ACCELEROMETER:
-                    robotData.aX = sensorValue.un.accelerometer.x;
-                    robotData.aY = sensorValue.un.accelerometer.y;
-                    robotData.aZ = sensorValue.un.accelerometer.z;
-                    break;
+        unsigned long currentMillis = millis();
+
+        // เช็คระยะทาง (Auto Distance)
+        if (isAutoDistance) {
+            float traveled = totalDistance - startDistance;
+            if (traveled >= distanceTarget) {
+                isAutoDistance = false;
+                targetWheelL = 0; targetWheelR = 0;
+                startWheelL = MAX_SPEED_MS; startWheelR = MAX_SPEED_MS;
+                moveStartTime = currentMillis;
             }
         }
 
-        // --- 3. แพ็กข้อมูล Encoder ล่าสุดส่งขึ้น ROS 2 ---
-        robotData.vel_L = global_meas_v_L;
-        robotData.vel_R = global_meas_v_R;
-        robotData.distance = totalDistance;
-
-        udpTelemetry.beginPacket(hostIP, udpPortTelemetry);
-        udpTelemetry.write((uint8_t*)&robotData, sizeof(RobotDataPacket));
-        udpTelemetry.endPacket();
-
-        vTaskDelayUntil(&xLastWakeTime, xFrequency);
-    }
-}
-
-// ==========================================
-// 4. MAIN LOOP บน Core 1 (ควบคุม Motor)
-// ==========================================
-void setup() {
-    Serial.begin(115200);
-
-    BTS7960_Init(&motor_L);
-    BTS7960_Init(&motor_R);
-    Encoder_Init(&encLeft, 18, 19); 
-    Encoder_Init(&encRight, 13, 14);
-
-    xTaskCreatePinnedToCore(
-        imuUdpTask, "IMU_UDP", 8192, NULL, 1, &TaskIMU_UDP, 0 
-    );
-}
-
-void loop() {
-    unsigned long currentMillis = millis();
-
-    // 1. Watchdog: ถ้าการเชื่อมต่อ ROS 2 ขาดหายเกิน 0.5 วินาที ให้รถหยุด
-    if (currentMillis - lastCmdTime > CMD_TIMEOUT_MS) {
-        udp_target_L = 0;
-        udp_target_R = 0;
-    }
-
-    // 2. ลูปควบคุม PID ที่ 50Hz (20ms)
-    if (currentMillis - prevPidTime >= pidInterval) {
-        double dt = (currentMillis - prevPidTime) / 1000.0;
-        prevPidTime = currentMillis;
-
-        // อัปเดต Target 
-        if (udp_target_L != targetWheelL || udp_target_R != targetWheelR) {
-            startWheelL = targetWheelL; 
-            startWheelR = targetWheelR;
-            targetWheelL = udp_target_L; 
-            targetWheelR = udp_target_R;
-            moveStartTime = currentMillis;
+        // อัปเดตเป้าหมายจาก CAN Mode
+        if (autoMode) {
+            if (Can_Target_L != targetWheelL || Can_Target_R != targetWheelR) {
+                startWheelL = targetWheelL; startWheelR = targetWheelR;
+                targetWheelL = Can_Target_L; targetWheelR = Can_Target_R;
+                moveStartTime = currentMillis;
+            }
         }
 
+        // คำนวณ S-Curve
         unsigned long elapsed = currentMillis - moveStartTime;
         float setpoint_L = SCurve((double)elapsed, startWheelL, targetWheelL - startWheelL, RAMP_DURATION);
         float setpoint_R = SCurve((double)elapsed, startWheelR, targetWheelR - startWheelR, RAMP_DURATION);
+        
+        // บันทึกไว้ให้ภายนอกดู
+        current_setpoint_L = setpoint_L;
+        current_setpoint_R = setpoint_R;
 
+        // คำนวณ Encoder
         long delta_L = Encoder_GetDelta(&encLeft);
         long delta_R = Encoder_GetDelta(&encRight);
         float dist_per_tick = (2.0 * PI * WHEEL_RADIUS) / WHEEL_PPR;
@@ -205,22 +202,153 @@ void loop() {
         float stepR = delta_R * dist_per_tick;
         totalDistance += (stepL + stepR) / 2.0;
 
-        float meas_v_L = stepL / dt;
-        float meas_v_R = stepR / dt;
+        // คำนวณความเร็ว Raw
+        float raw_v_L = stepL / dt;
+        float raw_v_R = stepR / dt;
 
-        // อัปเดตตัวแปร Global ให้ Core 0 นำไปส่ง
-        global_meas_v_L = meas_v_L;
-        global_meas_v_R = meas_v_R;
+        // ประยุกต์ใช้ Low-Pass Filter เพื่อลด Quantization Noise ที่ 1000Hz
+        filtered_v_L = (LPF_ALPHA * raw_v_L) + ((1.0f - LPF_ALPHA) * filtered_v_L);
+        filtered_v_R = (LPF_ALPHA * raw_v_R) + ((1.0f - LPF_ALPHA) * filtered_v_R);
+        
+        current_meas_v_L = filtered_v_L;
+        current_meas_v_R = filtered_v_R;
 
-        int final_L = (int)PIDMotorL.compute(setpoint_L, meas_v_L);
-        int final_R = (int)PIDMotorR.compute(setpoint_R, meas_v_R);
+        // คำนวณ PID
+        int final_L = (int)PIDMotorL.compute(setpoint_L, filtered_v_L);
+        int final_R = (int)PIDMotorR.compute(setpoint_R, filtered_v_R);
 
-        if (abs(setpoint_L) < 0.001 && abs(setpoint_R) < 0.001 && abs(meas_v_L) < 0.01) {
+        // สั่งงาน Motor
+        if (abs(setpoint_L) < 0.001 && abs(setpoint_R) < 0.001 && abs(filtered_v_L) < 0.01) {
             BTS7960_Stop(&motor_L);
             BTS7960_Stop(&motor_R);
         } else {
             BTS7960_SetSpeed(&motor_L, final_L);
             BTS7960_SetSpeed(&motor_R, final_R);
         }
+
+        // หน่วงเวลาให้ลูปนี้รันเป๊ะๆ ทุก 1ms (1000Hz)
+        vTaskDelayUntil(&xLastWakeTime, xFrequency);
+    }
+}
+
+// ==========================================
+// 4. MAIN SETUP & LOOP
+// ==========================================
+void setup() {
+    Serial.begin(115200);
+
+    // Setup WiFi
+    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+    Serial.print("Connecting to WiFi");
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(500);
+        Serial.print(".");
+    }
+    Serial.println("\nWiFi Connected!");
+
+    if (!MDNS.begin("myrobot")) {  
+        Serial.println("Error setting up MDNS!");
+    } else {
+        Serial.println("mDNS started: myrobot.local");
+    }
+
+    udp.begin(UDP_PORT);
+    
+    BTS7960_Init(&motor_L);
+    BTS7960_Init(&motor_R);
+    Encoder_Init(&encLeft, 18, 19); 
+    Encoder_Init(&encRight, 13, 14);
+    
+    setupCAN();
+
+    // เริ่มต้น Control Task บน Core 1 ด้วย Priority 10 (สูงกว่า loop ปกติ)
+    xTaskCreatePinnedToCore(
+        ControlLoopTask,   // ชื่อฟังก์ชัน Task
+        "ControlTask",     // ชื่อ Task (สำหรับ Debug)
+        8192,              // Stack Size
+        NULL,              // Parameters
+        10,                // Priority (ยิ่งมากยิ่งสำคัญ)
+        NULL,              // Task Handle
+        1                  // รันบน Core 1
+    );
+}
+
+void loop() {
+    // --- จัดการ I/O ทั้งหมดในลูปนี้ เพื่อไม่ให้กวน PID ---
+    readCAN(); 
+
+    int packetSize = udp.parsePacket();
+    if (packetSize == sizeof(ControlPacket)) {
+        udp.read((char*)&currentCommand, sizeof(ControlPacket));
+        lastUdpTime = millis();
+    }
+
+    if (millis() - lastUdpTime > UDP_TIMEOUT_MS) {
+        currentCommand.v_req = 0; currentCommand.w_req = 0;
+        currentCommand.btn_dpad = 0; currentCommand.btn_cancel = 0;
+        currentCommand.btn_toggle_mode = 0; currentCommand.btn_reset = 0;
+    }
+
+    // --- BUTTON LOGIC ---
+    if (currentCommand.btn_dpad != 0) {
+        autoMode = false;      
+        isAutoDistance = true; 
+        startDistance = totalDistance; 
+        
+        if (currentCommand.btn_dpad == 1) distanceTarget = 5.0;
+        else if (currentCommand.btn_dpad == 2) distanceTarget = 10.0;
+        else if (currentCommand.btn_dpad == 3) distanceTarget = 15.0;
+        else if (currentCommand.btn_dpad == 4) distanceTarget = 20.0;
+
+        startWheelL = targetWheelL; startWheelR = targetWheelR;
+        targetWheelL = MAX_SPEED_MS; targetWheelR = MAX_SPEED_MS;
+        moveStartTime = millis();
+        
+        currentCommand.btn_dpad = 0; 
+    }
+
+    if (abs(currentCommand.v_req) > 0.05 || abs(currentCommand.w_req) > 0.05 || currentCommand.btn_cancel) {
+        if (isAutoDistance) {
+            isAutoDistance = false;
+        }
+    }
+
+    bool currentToggle = currentCommand.btn_toggle_mode > 0;
+    if (currentToggle && !lastToggleState) {
+        autoMode = !autoMode;
+        isAutoDistance = false; 
+        startWheelL = targetWheelL; startWheelR = targetWheelR;
+        moveStartTime = millis();
+    }
+    lastToggleState = currentToggle;
+
+    if (currentCommand.btn_reset) {
+        totalDistance = 0;
+        isAutoDistance = false;
+        currentCommand.btn_reset = 0; 
+    }
+
+    if (!isAutoDistance && !autoMode) {
+        processWifiInput(); 
+    }
+
+    // --- ส่งข้อมูลออก (จำกัดความถี่ เพื่อไม่ให้บล็อกระบบ) ---
+    unsigned long currentMillis = millis();
+    static unsigned long lastCanTxTime = 0;
+    static unsigned long lastSerialPrintTime = 0;
+
+    // ส่ง CAN ที่ 20Hz (ทุกๆ 50ms)
+    if (currentMillis - lastCanTxTime >= 50) {
+        lastCanTxTime = currentMillis;
+        sendDistanceCAN();
+    }
+
+    // ปริ้นท์ Serial ที่ 10Hz (ทุกๆ 100ms)
+    if (currentMillis - lastSerialPrintTime >= 100) {
+        lastSerialPrintTime = currentMillis;
+        const char* modeStr = isAutoDistance ? "DIST" : (autoMode ? "AUTO" : "MAN");
+        Serial.printf("[%s] TgtL:%.2f TgtR:%.2f RealL:%.2f RealR:%.2f Dist:%.2f\n", 
+                      modeStr, current_setpoint_L, current_setpoint_R, 
+                      current_meas_v_L, current_meas_v_R, totalDistance);
     }
 }
