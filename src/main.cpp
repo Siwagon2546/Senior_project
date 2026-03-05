@@ -11,8 +11,8 @@
 // ==========================================
 // 1. CONFIGURATION & PINS
 // ==========================================
-BTS7960_t motor_L = { 22, 23, 255 }; 
-BTS7960_t motor_R = { 25, 26, 255 };
+BTS7960_t motor_L = { 23, 22, 255 }; 
+BTS7960_t motor_R = { 26, 25, 255 };
 Encoder_t encLeft, encRight;
 
 #define CAN_TX_PIN 5
@@ -33,8 +33,8 @@ volatile float targetWheelL = 0, targetWheelR = 0;
 const double RAMP_DURATION = 1000.0; 
 
 // PID
-PID PIDMotorL(-255, 255, 1000.0, 0.0, 0.0); 
-PID PIDMotorR(-255, 255, 1000.0, 0.0, 0.0);
+PID PIDMotorL(-255, 255, 250.0, 0.0, 0.0); 
+PID PIDMotorR(-255, 255, 250.0, 0.0, 0.0);
 
 // Control States
 volatile bool autoMode = false; 
@@ -52,8 +52,8 @@ volatile float current_setpoint_R = 0;
 // ==========================================
 // WIFI & UDP CONFIGURATION
 // ==========================================
-const char* WIFI_SSID = "swag_robot";
-const char* WIFI_PASSWORD = "0620355575";
+const char* WIFI_SSID = "TRACKING_YOUR_ADDRESS";
+const char* WIFI_PASSWORD = "08092003";
 const int UDP_PORT = 8888;
 
 AsyncUDP udp;
@@ -278,7 +278,7 @@ void setup() {
     
     BTS7960_Init(&motor_L);
     BTS7960_Init(&motor_R);
-    Encoder_Init(&encLeft, 18, 19); 
+    Encoder_Init(&encLeft, 19, 18); 
     Encoder_Init(&encRight, 13, 14);
     
     setupCAN();
