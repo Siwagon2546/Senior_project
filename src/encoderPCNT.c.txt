@@ -1,0 +1,70 @@
+#include "encoderPCNT.h"
+#include <string.h>
+
+void Encoder_Init(Encoder_t *enc, int a, int b, pcnt_unit_t unit) {
+    enc->pinA = a;
+    enc->pinB = b;
+    enc->unit = unit;
+    enc->total_count = 0;
+    enc->prevCount = 0;
+    enc->last_hw_count = 0;
+
+    pcnt_config_t pcnt_config;
+    memset(&pcnt_config, 0, sizeof(pcnt_config));
+
+    // --- Channel 0: ตรวจจับ Pin A (โดยใช้ Pin B เป็นตัวกำหนดทิศทาง) ---
+    pcnt_config.pulse_gpio_num = a;
+    pcnt_config.ctrl_gpio_num = b;
+    pcnt_config.unit = unit;
+    pcnt_config.channel = PCNT_CHANNEL_0;
+    pcnt_config.pos_mode = PCNT_COUNT_DEC; // นับที่ขาขึ้น
+    pcnt_config.neg_mode = PCNT_COUNT_INC; // นับที่ขาลง (นี่คือ x2 แล้ว)
+    pcnt_config.lctrl_mode = PCNT_MODE_REVERSE; // ถ้า B เป็น Low ให้กลับทิศ
+    pcnt_config.hctrl_mode = PCNT_MODE_KEEP;    // ถ้า B เป็น High ให้คงทิศ
+    pcnt_config.counter_h_lim = 32767;
+    pcnt_config.counter_l_lim = -32768;
+    pcnt_unit_config(&pcnt_config);
+
+    // --- Channel 1: ตรวจจับ Pin B (โดยใช้ Pin A เป็นตัวกำหนดทิศทาง) ---
+    // การทำแบบนี้จะทำให้ได้พัลส์เพิ่มอีก 2 รวมเป็น x4
+    pcnt_config.pulse_gpio_num = b;
+    pcnt_config.ctrl_gpio_num = a;
+    pcnt_config.channel = PCNT_CHANNEL_1;
+    pcnt_config.pos_mode = PCNT_COUNT_INC; 
+    pcnt_config.neg_mode = PCNT_COUNT_DEC;
+    pcnt_unit_config(&pcnt_config);
+
+    // --- ใส่ Filter เพื่อลด Noise (ป้องกันอาการมอเตอร์พุ่ง/กระตุก) ---
+    pcnt_set_filter_value(unit, 250); // กรองสัญญาณที่สั้นกว่า 250 APB cycles
+    pcnt_filter_enable(unit);
+
+    pcnt_counter_pause(unit);
+    pcnt_counter_clear(unit);
+    pcnt_counter_resume(unit);
+}
+
+int32_t Encoder_GetCount(Encoder_t *enc) {
+    int16_t hw_count = 0;
+    pcnt_get_counter_value(enc->unit, &hw_count);
+    
+    // คำนวณส่วนต่างแบบ 16-bit เพื่อจัดการเรื่อง Overflow (สำคัญมาก!)
+    int16_t diff = hw_count - enc->last_hw_count;
+    enc->total_count += diff;
+    enc->last_hw_count = hw_count;
+    
+    return enc->total_count;
+}
+
+int32_t Encoder_GetDelta(Encoder_t *enc) {
+    int32_t current_count = Encoder_GetCount(enc);
+    int32_t delta = current_count - enc->prevCount;
+    enc->prevCount = current_count;
+    return delta;
+}
+
+void Encoder_Reset(Encoder_t *enc) {
+    pcnt_counter_clear(enc->unit);
+    enc->total_count = 0;
+    enc->prevCount = 0;
+    enc->last_hw_count = 0;
+}

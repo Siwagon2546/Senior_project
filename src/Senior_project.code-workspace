@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"name": "Senior_project",
+			"path": "../../../../../Low_level_esp32/Senior_project"
+		},
+		{
+			"name": "Micro_ros_senior_project",
+			"path": ".."
+		}
+	],
+	"settings": {}
+}
