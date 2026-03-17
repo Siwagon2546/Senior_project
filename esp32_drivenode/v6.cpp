@@ -15,7 +15,7 @@ Encoder_t encLeft, encRight;
 PID PIDMotorL(-255, 255, 200.0, 0.0, 0.0);
 PID PIDMotorR(-255, 255, 200.0, 0.0, 0.0);
 
-const float WHEEL_RADIUS = 0.055;
+const float WHEEL_RADIUS = 0.05;
 const float TRACK_WIDTH  = 0.37;
 const float WHEEL_PPR    = 16.0 * 99.5; 
 const float DIST_PER_TICK = (2.0 * M_PI * WHEEL_RADIUS) / WHEEL_PPR;
