@@ -1,0 +1,94 @@
+[0.000000] (-) TimerEvent: {}
+[0.002060] (whitepost_robot) JobQueued: {'identifier': 'whitepost_robot', 'dependencies': OrderedDict()}
+[0.002764] (whitepost_robot) JobStarted: {'identifier': 'whitepost_robot'}
+[0.099280] (-) TimerEvent: {}
+[0.200128] (-) TimerEvent: {}
+[0.300859] (-) TimerEvent: {}
+[0.401604] (-) TimerEvent: {}
+[0.502386] (-) TimerEvent: {}
+[0.646038] (-) TimerEvent: {}
+[0.746851] (-) TimerEvent: {}
+[0.847818] (-) TimerEvent: {}
+[0.948776] (-) TimerEvent: {}
+[1.050493] (-) TimerEvent: {}
+[1.152071] (-) TimerEvent: {}
+[1.253292] (-) TimerEvent: {}
+[1.354725] (-) TimerEvent: {}
+[1.456095] (-) TimerEvent: {}
+[1.557412] (-) TimerEvent: {}
+[1.658759] (-) TimerEvent: {}
+[1.760460] (-) TimerEvent: {}
+[1.863242] (-) TimerEvent: {}
+[1.964773] (-) TimerEvent: {}
+[2.066121] (-) TimerEvent: {}
+[2.167443] (-) TimerEvent: {}
+[2.268861] (-) TimerEvent: {}
+[2.370181] (-) TimerEvent: {}
+[2.471448] (-) TimerEvent: {}
+[2.572774] (-) TimerEvent: {}
+[2.674249] (-) TimerEvent: {}
+[2.775570] (-) TimerEvent: {}
+[2.876773] (-) TimerEvent: {}
+[2.977504] (-) TimerEvent: {}
+[3.078268] (-) TimerEvent: {}
+[3.179025] (-) TimerEvent: {}
+[3.279786] (-) TimerEvent: {}
+[3.380491] (-) TimerEvent: {}
+[3.481283] (-) TimerEvent: {}
+[3.581981] (-) TimerEvent: {}
+[3.682866] (-) TimerEvent: {}
+[3.783637] (-) TimerEvent: {}
+[3.884394] (-) TimerEvent: {}
+[3.985486] (-) TimerEvent: {}
+[4.086378] (-) TimerEvent: {}
+[4.187264] (-) TimerEvent: {}
+[4.288155] (-) TimerEvent: {}
+[4.388878] (-) TimerEvent: {}
+[4.489792] (-) TimerEvent: {}
+[4.590743] (-) TimerEvent: {}
+[4.686594] (whitepost_robot) Command: {'cmd': ['/usr/bin/python3', '-W', 'ignore:setup.py install is deprecated', '-W', 'ignore:easy_install command is deprecated', 'setup.py', 'egg_info', '--egg-base', '../../build/whitepost_robot', 'build', '--build-base', '/home/whitepost/ros2_ws/build/whitepost_robot/build', 'install', '--record', '/home/whitepost/ros2_ws/build/whitepost_robot/install.log', '--single-version-externally-managed', 'install_data'], 'cwd': '/home/whitepost/ros2_ws/src/whitepost_robot', 'env': {'LESSOPEN': '| /usr/bin/lesspipe %s', 'USER': 'whitepost', 'SSH_CLIENT': '192.168.1.10 47788 22', 'LC_TIME': 'C.UTF-8', 'XDG_SESSION_TYPE': 'tty', 'GIT_ASKPASS': '/home/whitepost/.vscode-server/cli/servers/Stable-072586267e68ece9a47aa43f8c108e0dcbf44622/server/extensions/git/dist/askpass.sh', 'SHLVL': '2', 'LD_LIBRARY_PATH': '/opt/ros/humble/lib/aarch64-linux-gnu:/opt/ros/humble/lib', 'BROWSER': '/home/whitepost/.vscode-server/cli/servers/Stable-072586267e68ece9a47aa43f8c108e0dcbf44622/server/bin/helpers/browser.sh', 'MOTD_SHOWN': 'pam', 'HOME': '/home/whitepost', 'TERM_PROGRAM_VERSION': '1.109.5', 'VSCODE_IPC_HOOK_CLI': '/run/user/1000/vscode-ipc-f3069fa8-d89f-48d2-a60f-7a20e2f12f7b.sock', 'ROS_PYTHON_VERSION': '3', 'VSCODE_GIT_ASKPASS_MAIN': '/home/whitepost/.vscode-server/cli/servers/Stable-072586267e68ece9a47aa43f8c108e0dcbf44622/server/extensions/git/dist/askpass-main.js', 'LC_MONETARY': 'C.UTF-8', 'VSCODE_GIT_ASKPASS_NODE': '/home/whitepost/.vscode-server/cli/servers/Stable-072586267e68ece9a47aa43f8c108e0dcbf44622/server/node', 'SSL_CERT_FILE': '/usr/lib/ssl/certs/ca-certificates.crt', 'VSCODE_PYTHON_AUTOACTIVATE_GUARD': '1', 'DBUS_SESSION_BUS_ADDRESS': 'unix:path=/run/user/1000/bus', 'COLORTERM': 'truecolor', 'COLCON_PREFIX_PATH': '/home/whitepost/ros2_ws/install', 'ROS_DISTRO': 'humble', 'LOGNAME': 'whitepost', '_': '/usr/bin/colcon', 'ROS_VERSION': '2', 'XDG_SESSION_CLASS': 'user', 'TERM': 'xterm-256color', 'XDG_SESSION_ID': '1', 'ROS_LOCALHOST_ONLY': '0', 'PATH': '/home/whitepost/.vscode-server/cli/servers/Stable-072586267e68ece9a47aa43f8c108e0dcbf44622/server/bin/remote-cli:/opt/ros/humble/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin', 'LC_ADDRESS': 'C.UTF-8', 'XDG_RUNTIME_DIR': '/run/user/1000', 'SSL_CERT_DIR': '/usr/lib/ssl/certs', 'LANG': 'C.UTF-8', 'LC_TELEPHONE': 'C.UTF-8', 'LS_COLORS': 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:', 'VSCODE_GIT_IPC_HANDLE': '/run/user/1000/vscode-git-16ee291d27.sock', 'TERM_PROGRAM': 'vscode', 'ROS_DOMAIN_ID': '22', 'AMENT_PREFIX_PATH': '/home/whitepost/ros2_ws/install/whitepost_robot:/opt/ros/humble', 'SHELL': '/bin/bash', 'LC_NAME': 'C.UTF-8', 'LESSCLOSE': '/usr/bin/lesspipe %s %s', 'LC_MEASUREMENT': 'C.UTF-8', 'LC_IDENTIFICATION': 'C.UTF-8', 'VSCODE_GIT_ASKPASS_EXTRA_ARGS': '', 'PWD': '/home/whitepost/ros2_ws/build/whitepost_robot', 'SSH_CONNECTION': '192.168.1.10 47788 192.168.1.100 22', 'XDG_DATA_DIRS': '/usr/local/share:/usr/share:/var/lib/snapd/desktop', 'PYTHONPATH': '/home/whitepost/ros2_ws/build/whitepost_robot/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/whitepost/ros2_ws/install/whitepost_robot/lib/python3.10/site-packages:/home/whitepost/ros2_ws/install/whitepost_robot/lib/python3.10/site-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages', 'LC_NUMERIC': 'C.UTF-8', 'LC_PAPER': 'C.UTF-8', 'COLCON': '1'}, 'shell': False}
+[4.699968] (-) TimerEvent: {}
+[4.804175] (-) TimerEvent: {}
+[4.904952] (-) TimerEvent: {}
+[5.005763] (-) TimerEvent: {}
+[5.106526] (-) TimerEvent: {}
+[5.207275] (-) TimerEvent: {}
+[5.307997] (-) TimerEvent: {}
+[5.408683] (-) TimerEvent: {}
+[5.509409] (-) TimerEvent: {}
+[5.610112] (-) TimerEvent: {}
+[5.710802] (-) TimerEvent: {}
+[5.812132] (-) TimerEvent: {}
+[5.868487] (whitepost_robot) StdoutLine: {'line': b'running egg_info\n'}
+[5.874980] (whitepost_robot) StdoutLine: {'line': b'writing ../../build/whitepost_robot/whitepost_robot.egg-info/PKG-INFO\n'}
+[5.877621] (whitepost_robot) StdoutLine: {'line': b'writing dependency_links to ../../build/whitepost_robot/whitepost_robot.egg-info/dependency_links.txt\n'}
+[5.879690] (whitepost_robot) StdoutLine: {'line': b'writing entry points to ../../build/whitepost_robot/whitepost_robot.egg-info/entry_points.txt\n'}
+[5.881607] (whitepost_robot) StdoutLine: {'line': b'writing requirements to ../../build/whitepost_robot/whitepost_robot.egg-info/requires.txt\n'}
+[5.883610] (whitepost_robot) StdoutLine: {'line': b'writing top-level names to ../../build/whitepost_robot/whitepost_robot.egg-info/top_level.txt\n'}
+[5.904453] (whitepost_robot) StdoutLine: {'line': b"reading manifest file '../../build/whitepost_robot/whitepost_robot.egg-info/SOURCES.txt'\n"}
+[5.912532] (-) TimerEvent: {}
+[5.919972] (whitepost_robot) StdoutLine: {'line': b"writing manifest file '../../build/whitepost_robot/whitepost_robot.egg-info/SOURCES.txt'\n"}
+[5.923000] (whitepost_robot) StdoutLine: {'line': b'running build\n'}
+[5.924847] (whitepost_robot) StdoutLine: {'line': b'running build_py\n'}
+[5.926020] (whitepost_robot) StdoutLine: {'line': b'copying whitepost_robot/esp32_drive_node.py -> /home/whitepost/ros2_ws/build/whitepost_robot/build/lib/whitepost_robot\n'}
+[5.930046] (whitepost_robot) StdoutLine: {'line': b'running install\n'}
+[5.933053] (whitepost_robot) StdoutLine: {'line': b'running install_lib\n'}
+[5.941628] (whitepost_robot) StdoutLine: {'line': b'copying /home/whitepost/ros2_ws/build/whitepost_robot/build/lib/whitepost_robot/esp32_drive_node.py -> /home/whitepost/ros2_ws/install/whitepost_robot/lib/python3.10/site-packages/whitepost_robot\n'}
+[5.949903] (whitepost_robot) StdoutLine: {'line': b'byte-compiling /home/whitepost/ros2_ws/install/whitepost_robot/lib/python3.10/site-packages/whitepost_robot/esp32_drive_node.py to esp32_drive_node.cpython-310.pyc\n'}
+[5.959205] (whitepost_robot) StdoutLine: {'line': b'running install_data\n'}
+[5.961816] (whitepost_robot) StdoutLine: {'line': b'running install_egg_info\n'}
+[5.978304] (whitepost_robot) StdoutLine: {'line': b"removing '/home/whitepost/ros2_ws/install/whitepost_robot/lib/python3.10/site-packages/whitepost_robot-0.0.0-py3.10.egg-info' (and everything under it)\n"}
+[5.982871] (whitepost_robot) StdoutLine: {'line': b'Copying ../../build/whitepost_robot/whitepost_robot.egg-info to /home/whitepost/ros2_ws/install/whitepost_robot/lib/python3.10/site-packages/whitepost_robot-0.0.0-py3.10.egg-info\n'}
+[6.002645] (whitepost_robot) StdoutLine: {'line': b'running install_scripts\n'}
+[6.012770] (-) TimerEvent: {}
+[6.114172] (-) TimerEvent: {}
+[6.198802] (whitepost_robot) StdoutLine: {'line': b'Installing esp32_drive_node script to /home/whitepost/ros2_ws/install/whitepost_robot/lib/whitepost_robot\n'}
+[6.200711] (whitepost_robot) StdoutLine: {'line': b'Installing esp32_sensor_node script to /home/whitepost/ros2_ws/install/whitepost_robot/lib/whitepost_robot\n'}
+[6.204918] (whitepost_robot) StdoutLine: {'line': b"writing list of installed files to '/home/whitepost/ros2_ws/build/whitepost_robot/install.log'\n"}
+[6.214558] (-) TimerEvent: {}
+[6.318058] (-) TimerEvent: {}
+[6.401387] (whitepost_robot) CommandEnded: {'returncode': 0}
+[6.418362] (-) TimerEvent: {}
+[6.520573] (-) TimerEvent: {}
+[6.556212] (whitepost_robot) JobEnded: {'identifier': 'whitepost_robot', 'rc': 0}
+[6.562721] (-) EventReactorShutdown: {}

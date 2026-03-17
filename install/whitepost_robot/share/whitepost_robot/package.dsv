@@ -1,0 +1,6 @@
+source;share/whitepost_robot/hook/pythonpath.ps1
+source;share/whitepost_robot/hook/pythonpath.dsv
+source;share/whitepost_robot/hook/pythonpath.sh
+source;share/whitepost_robot/hook/ament_prefix_path.ps1
+source;share/whitepost_robot/hook/ament_prefix_path.dsv
+source;share/whitepost_robot/hook/ament_prefix_path.sh

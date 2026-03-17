@@ -1,0 +1,4 @@
+[console_scripts]
+esp32_drive_node = whitepost_robot.esp32_drive_node:main
+esp32_sensor_node = whitepost_robot.esp32_sensor_node:main
+

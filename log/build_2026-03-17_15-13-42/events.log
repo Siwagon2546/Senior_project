@@ -1,0 +1,5 @@
+[0.000000] (-) TimerEvent: {}
+[0.001923] (whitepost_robot) JobQueued: {'identifier': 'whitepost_robot', 'dependencies': OrderedDict()}
+[0.002639] (whitepost_robot) JobStarted: {'identifier': 'whitepost_robot'}
+[0.085214] (whitepost_robot) JobEnded: {'identifier': 'whitepost_robot', 'rc': 0}
+[0.088459] (-) EventReactorShutdown: {}
