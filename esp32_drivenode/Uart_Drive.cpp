@@ -144,42 +144,44 @@ void setup() {
 }
 
 void loop() {
-    // ---- รับ CommandPacket จาก Python ----
-    // CommandPacket = 9 bytes (v:4 + w:4 + checksum:1)
-    // Header = AA 55 (2 bytes) → รวม 11 bytes ต่อ frame
-    if (Serial.available() >= (int)(sizeof(CommandPacket) + 2)) {
-        if (Serial.read() == 0xAA) {
-            if (Serial.read() == 0x55) {
-                CommandPacket cmd;
-                Serial.readBytes((uint8_t*)&cmd, sizeof(CommandPacket));
+    // 1. รับ Command จาก Python แบบ Robust
+    static uint8_t rx_state = 0;
+    static uint8_t rx_buffer[sizeof(CommandPacket)];
+    static uint8_t rx_idx = 0;
 
-                // ✅ แก้ไข: คำนวณ checksum เฉพาะ payload bytes เท่านั้น
-                //    (8 bytes = v_target + omega_target, ไม่รวม checksum field)
-                uint8_t  sum = 0;
-                uint8_t* ptr = (uint8_t*)&cmd;
-                for (int i = 0; i < (int)(sizeof(CommandPacket) - 1); i++) {
-                    sum += ptr[i];
-                }
+    while (Serial.available() > 0) {
+        uint8_t c = Serial.read();
+        if (rx_state == 0 && c == 0xAA) rx_state = 1;
+        else if (rx_state == 1 && c == 0x55) {
+            rx_state = 2;
+            rx_idx = 0;
+        }
+        else if (rx_state == 2) {
+            rx_buffer[rx_idx++] = c;
+            if (rx_idx >= sizeof(CommandPacket)) {
+                // ครบ Packet แล้ว ตรวจ Checksum
+                CommandPacket* cmd_ptr = (CommandPacket*)rx_buffer;
+                uint8_t sum = 0;
+                for (int i = 0; i < 8; i++) sum += rx_buffer[i];
 
-                if (sum == cmd.checksum) {
+                if (sum == cmd_ptr->checksum) {
                     portENTER_CRITICAL(&gMux);
-                    target_v = cmd.v_target;
-                    target_w = cmd.omega_target;
+                    target_v = cmd_ptr->v_target;
+                    target_w = cmd_ptr->omega_target;
                     portEXIT_CRITICAL(&gMux);
-
-                    // ✅ แก้ไข: อัปเดต watchdog timestamp
                     lastCmdMillis = millis();
                 }
-                // ถ้า checksum ไม่ตรง ก็แค่ ignore packet นี้
+                rx_state = 0; // Reset state
             }
+        } else {
+            rx_state = 0;
         }
     }
 
-    // ---- ส่ง FeedbackPacket กลับ Python ที่ 50 Hz ----
+    // 2. ส่ง Feedback กลับ Python (100 Hz)
     static unsigned long lastTX = 0;
-    if (millis() - lastTX >= 10) {
+    if (millis() - lastTX >= 10) { // 100Hz เพื่อความสมูทของ VSLAM
         lastTX = millis();
-
         FeedbackPacket pkt;
         portENTER_CRITICAL(&gMux);
         pkt.v_measured     = curr_v;
@@ -188,7 +190,6 @@ void loop() {
         pkt.right_ticks    = share_right_ticks;
         portEXIT_CRITICAL(&gMux);
 
-        // checksum ครอบคลุม 16 bytes: v(4)+w(4)+L(4)+R(4)
         uint8_t* ptr = (uint8_t*)&pkt.v_measured;
         pkt.checksum = 0;
         for (int i = 0; i < 16; i++) pkt.checksum += ptr[i];
