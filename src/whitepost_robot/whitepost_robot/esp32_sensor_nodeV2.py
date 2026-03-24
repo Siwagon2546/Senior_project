@@ -32,8 +32,20 @@ class SensorSerialNode(Node):
 
     def connect_serial(self):
         try:
-            if self.serial_conn: self.serial_conn.close()
-            self.serial_conn = serial.Serial(self.port_name, self.baud_rate, timeout=0, dtr=False, rts=False)
+            if self.serial_conn and self.serial_conn.is_open:
+                self.serial_conn.close()
+            
+            # สร้าง Object แบบยังไม่เปิด Port
+            self.serial_conn = serial.Serial()
+            self.serial_conn.port = self.port_name
+            self.serial_conn.baudrate = self.baud_rate
+            self.serial_conn.timeout = 0
+            
+            # ปิด DTR/RTS ก่อนเปิดเพื่อไม่ให้ ESP32 Reset
+            self.serial_conn.dtr = False
+            self.serial_conn.rts = False
+            
+            self.serial_conn.open()
             self.get_logger().info(f"✅ IMU Serial Connected: {self.port_name}")
         except Exception as e:
             self.get_logger().error(f"❌ IMU Connect Failed: {e}")
