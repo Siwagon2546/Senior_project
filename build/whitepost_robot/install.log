@@ -1,11 +1,13 @@
 /home/whitepost/ros2_ws/install/whitepost_robot/lib/python3.10/site-packages/whitepost_robot/esp32_drive_node.py
 /home/whitepost/ros2_ws/install/whitepost_robot/lib/python3.10/site-packages/whitepost_robot/__init__.py
 /home/whitepost/ros2_ws/install/whitepost_robot/lib/python3.10/site-packages/whitepost_robot/esp32_sensor_node.py
-/home/whitepost/ros2_ws/install/whitepost_robot/lib/python3.10/site-packages/whitepost_robot/esp32_drive_node2.py
+/home/whitepost/ros2_ws/install/whitepost_robot/lib/python3.10/site-packages/whitepost_robot/esp32_sensor_nodeV2.py
+/home/whitepost/ros2_ws/install/whitepost_robot/lib/python3.10/site-packages/whitepost_robot/esp32_drive_nodeV2.py
 /home/whitepost/ros2_ws/install/whitepost_robot/lib/python3.10/site-packages/whitepost_robot/__pycache__/esp32_drive_node.cpython-310.pyc
 /home/whitepost/ros2_ws/install/whitepost_robot/lib/python3.10/site-packages/whitepost_robot/__pycache__/__init__.cpython-310.pyc
 /home/whitepost/ros2_ws/install/whitepost_robot/lib/python3.10/site-packages/whitepost_robot/__pycache__/esp32_sensor_node.cpython-310.pyc
-/home/whitepost/ros2_ws/install/whitepost_robot/lib/python3.10/site-packages/whitepost_robot/__pycache__/esp32_drive_node2.cpython-310.pyc
+/home/whitepost/ros2_ws/install/whitepost_robot/lib/python3.10/site-packages/whitepost_robot/__pycache__/esp32_sensor_nodeV2.cpython-310.pyc
+/home/whitepost/ros2_ws/install/whitepost_robot/lib/python3.10/site-packages/whitepost_robot/__pycache__/esp32_drive_nodeV2.cpython-310.pyc
 /home/whitepost/ros2_ws/install/whitepost_robot/share/ament_index/resource_index/packages/whitepost_robot
 /home/whitepost/ros2_ws/install/whitepost_robot/share/whitepost_robot/package.xml
 /home/whitepost/ros2_ws/install/whitepost_robot/share/whitepost_robot/launch/whitepostlaunch.py

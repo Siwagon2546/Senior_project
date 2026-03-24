@@ -1,0 +1,22 @@
+[6.816s] Invoking command in '/home/whitepost/ros2_ws/src/whitepost_robot': PYTHONPATH=/home/whitepost/ros2_ws/build/whitepost_robot/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/whitepost/ros2_ws/install/whitepost_robot/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/whitepost_robot build --build-base /home/whitepost/ros2_ws/build/whitepost_robot/build install --record /home/whitepost/ros2_ws/build/whitepost_robot/install.log --single-version-externally-managed install_data
+[9.605s] running egg_info
+[9.612s] writing ../../build/whitepost_robot/whitepost_robot.egg-info/PKG-INFO
+[9.614s] writing dependency_links to ../../build/whitepost_robot/whitepost_robot.egg-info/dependency_links.txt
+[9.618s] writing entry points to ../../build/whitepost_robot/whitepost_robot.egg-info/entry_points.txt
+[9.619s] writing requirements to ../../build/whitepost_robot/whitepost_robot.egg-info/requires.txt
+[9.622s] writing top-level names to ../../build/whitepost_robot/whitepost_robot.egg-info/top_level.txt
+[9.643s] reading manifest file '../../build/whitepost_robot/whitepost_robot.egg-info/SOURCES.txt'
+[9.655s] writing manifest file '../../build/whitepost_robot/whitepost_robot.egg-info/SOURCES.txt'
+[9.657s] running build
+[9.658s] running build_py
+[9.664s] running install
+[9.667s] running install_lib
+[9.685s] running install_data
+[9.688s] running install_egg_info
+[9.705s] removing '/home/whitepost/ros2_ws/install/whitepost_robot/lib/python3.10/site-packages/whitepost_robot-0.0.0-py3.10.egg-info' (and everything under it)
+[9.710s] Copying ../../build/whitepost_robot/whitepost_robot.egg-info to /home/whitepost/ros2_ws/install/whitepost_robot/lib/python3.10/site-packages/whitepost_robot-0.0.0-py3.10.egg-info
+[9.727s] running install_scripts
+[9.934s] Installing esp32_drive_node script to /home/whitepost/ros2_ws/install/whitepost_robot/lib/whitepost_robot
+[9.936s] Installing esp32_sensor_node script to /home/whitepost/ros2_ws/install/whitepost_robot/lib/whitepost_robot
+[9.941s] writing list of installed files to '/home/whitepost/ros2_ws/build/whitepost_robot/install.log'
+[10.159s] Invoked command in '/home/whitepost/ros2_ws/src/whitepost_robot' returned '0': PYTHONPATH=/home/whitepost/ros2_ws/build/whitepost_robot/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/whitepost/ros2_ws/install/whitepost_robot/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/whitepost_robot build --build-base /home/whitepost/ros2_ws/build/whitepost_robot/build install --record /home/whitepost/ros2_ws/build/whitepost_robot/install.log --single-version-externally-managed install_data

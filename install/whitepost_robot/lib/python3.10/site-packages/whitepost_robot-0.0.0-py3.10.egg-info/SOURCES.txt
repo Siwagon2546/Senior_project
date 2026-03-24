@@ -15,5 +15,6 @@ test/test_flake8.py
 test/test_pep257.py
 whitepost_robot/__init__.py
 whitepost_robot/esp32_drive_node.py
-whitepost_robot/esp32_drive_node2.py
+whitepost_robot/esp32_drive_nodeV2.py
 whitepost_robot/esp32_sensor_node.py
+whitepost_robot/esp32_sensor_nodeV2.py

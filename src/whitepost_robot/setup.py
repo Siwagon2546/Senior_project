@@ -25,8 +25,8 @@ setup(
     entry_points={
         'console_scripts': [
             # เช็คชื่อไฟล์ตรงนี้ให้ตรงกับที่คุณตั้งไว้นะครับ
-            'esp32_drive_node = whitepost_robot.esp32_drive_node:main',
-            'esp32_sensor_node = whitepost_robot.esp32_sensor_node:main',
+            'esp32_drive_node = whitepost_robot.esp32_drive_nodeV2:main',
+            'esp32_sensor_node = whitepost_robot.esp32_sensor_nodeV2:main',
         ],
     },
 )

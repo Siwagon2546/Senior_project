@@ -1,0 +1,110 @@
+[0.000000] (-) TimerEvent: {}
+[0.001539] (whitepost_robot) JobQueued: {'identifier': 'whitepost_robot', 'dependencies': OrderedDict()}
+[0.001849] (whitepost_robot) JobStarted: {'identifier': 'whitepost_robot'}
+[0.097875] (-) TimerEvent: {}
+[0.198732] (-) TimerEvent: {}
+[0.299891] (-) TimerEvent: {}
+[0.401155] (-) TimerEvent: {}
+[0.502417] (-) TimerEvent: {}
+[0.603798] (-) TimerEvent: {}
+[0.705032] (-) TimerEvent: {}
+[0.806968] (-) TimerEvent: {}
+[0.908784] (-) TimerEvent: {}
+[1.009980] (-) TimerEvent: {}
+[1.111132] (-) TimerEvent: {}
+[1.212356] (-) TimerEvent: {}
+[1.313551] (-) TimerEvent: {}
+[1.414745] (-) TimerEvent: {}
+[1.515923] (-) TimerEvent: {}
+[1.617153] (-) TimerEvent: {}
+[1.718307] (-) TimerEvent: {}
+[1.819465] (-) TimerEvent: {}
+[1.920691] (-) TimerEvent: {}
+[2.021850] (-) TimerEvent: {}
+[2.122999] (-) TimerEvent: {}
+[2.224257] (-) TimerEvent: {}
+[2.325808] (-) TimerEvent: {}
+[2.426976] (-) TimerEvent: {}
+[2.528291] (-) TimerEvent: {}
+[2.629739] (-) TimerEvent: {}
+[2.730977] (-) TimerEvent: {}
+[2.832225] (-) TimerEvent: {}
+[2.933332] (-) TimerEvent: {}
+[3.034045] (-) TimerEvent: {}
+[3.134831] (-) TimerEvent: {}
+[3.236172] (-) TimerEvent: {}
+[3.337412] (-) TimerEvent: {}
+[3.438603] (-) TimerEvent: {}
+[3.539823] (-) TimerEvent: {}
+[3.641106] (-) TimerEvent: {}
+[3.742247] (-) TimerEvent: {}
+[3.843451] (-) TimerEvent: {}
+[3.944682] (-) TimerEvent: {}
+[4.045822] (-) TimerEvent: {}
+[4.146976] (-) TimerEvent: {}
+[4.248184] (-) TimerEvent: {}
+[4.349358] (-) TimerEvent: {}
+[4.450521] (-) TimerEvent: {}
+[4.551719] (-) TimerEvent: {}
+[4.652943] (-) TimerEvent: {}
+[4.754114] (-) TimerEvent: {}
+[4.855272] (-) TimerEvent: {}
+[4.956468] (-) TimerEvent: {}
+[5.057621] (-) TimerEvent: {}
+[5.158778] (-) TimerEvent: {}
+[5.259909] (-) TimerEvent: {}
+[5.360755] (-) TimerEvent: {}
+[5.461998] (-) TimerEvent: {}
+[5.563172] (-) TimerEvent: {}
+[5.664399] (-) TimerEvent: {}
+[5.765576] (-) TimerEvent: {}
+[5.866872] (-) TimerEvent: {}
+[5.967689] (-) TimerEvent: {}
+[6.068436] (-) TimerEvent: {}
+[6.169269] (-) TimerEvent: {}
+[6.270038] (-) TimerEvent: {}
+[6.372220] (-) TimerEvent: {}
+[6.425101] (whitepost_robot) Command: {'cmd': ['/usr/bin/python3', '-W', 'ignore:setup.py install is deprecated', '-W', 'ignore:easy_install command is deprecated', 'setup.py', 'egg_info', '--egg-base', '../../build/whitepost_robot', 'build', '--build-base', '/home/whitepost/ros2_ws/build/whitepost_robot/build', 'install', '--record', '/home/whitepost/ros2_ws/build/whitepost_robot/install.log', '--single-version-externally-managed', 'install_data'], 'cwd': '/home/whitepost/ros2_ws/src/whitepost_robot', 'env': {'LESSOPEN': '| /usr/bin/lesspipe %s', 'USER': 'whitepost', 'SSH_CLIENT': '192.168.1.10 42632 22', 'LC_TIME': 'C.UTF-8', 'XDG_SESSION_TYPE': 'tty', 'SHLVL': '2', 'LD_LIBRARY_PATH': '/opt/ros/humble/lib/aarch64-linux-gnu:/opt/ros/humble/lib', 'MOTD_SHOWN': 'pam', 'HOME': '/home/whitepost', 'OLDPWD': '/home/whitepost', 'SSH_TTY': '/dev/pts/0', 'ROS_PYTHON_VERSION': '3', 'LC_MONETARY': 'C.UTF-8', 'DBUS_SESSION_BUS_ADDRESS': 'unix:path=/run/user/1000/bus', 'ROS_DISTRO': 'humble', 'LOGNAME': 'whitepost', '_': '/usr/bin/colcon', 'ROS_VERSION': '2', 'XDG_SESSION_CLASS': 'user', 'TERM': 'xterm-256color', 'XDG_SESSION_ID': '1', 'ROS_LOCALHOST_ONLY': '0', 'PATH': '/opt/ros/humble/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin', 'LC_ADDRESS': 'C.UTF-8', 'XDG_RUNTIME_DIR': '/run/user/1000', 'LANG': 'C.UTF-8', 'LC_TELEPHONE': 'C.UTF-8', 'LS_COLORS': 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:', 'ROS_DOMAIN_ID': '22', 'AMENT_PREFIX_PATH': '/opt/ros/humble', 'SHELL': '/bin/bash', 'LC_NAME': 'C.UTF-8', 'LESSCLOSE': '/usr/bin/lesspipe %s %s', 'LC_MEASUREMENT': 'C.UTF-8', 'LC_IDENTIFICATION': 'C.UTF-8', 'PWD': '/home/whitepost/ros2_ws/build/whitepost_robot', 'SSH_CONNECTION': '192.168.1.10 42632 192.168.1.100 22', 'XDG_DATA_DIRS': '/usr/local/share:/usr/share:/var/lib/snapd/desktop', 'PYTHONPATH': '/home/whitepost/ros2_ws/build/whitepost_robot/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/whitepost/ros2_ws/install/whitepost_robot/lib/python3.10/site-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages', 'LC_NUMERIC': 'C.UTF-8', 'LC_PAPER': 'C.UTF-8', 'COLCON': '1'}, 'shell': False}
+[6.472366] (-) TimerEvent: {}
+[6.573092] (-) TimerEvent: {}
+[6.673819] (-) TimerEvent: {}
+[6.774514] (-) TimerEvent: {}
+[6.875265] (-) TimerEvent: {}
+[6.975971] (-) TimerEvent: {}
+[7.076848] (-) TimerEvent: {}
+[7.177560] (-) TimerEvent: {}
+[7.278227] (-) TimerEvent: {}
+[7.378927] (-) TimerEvent: {}
+[7.479672] (-) TimerEvent: {}
+[7.580909] (-) TimerEvent: {}
+[7.682161] (-) TimerEvent: {}
+[7.728134] (whitepost_robot) StdoutLine: {'line': b'running egg_info\n'}
+[7.734304] (whitepost_robot) StdoutLine: {'line': b'writing ../../build/whitepost_robot/whitepost_robot.egg-info/PKG-INFO\n'}
+[7.740868] (whitepost_robot) StdoutLine: {'line': b'writing dependency_links to ../../build/whitepost_robot/whitepost_robot.egg-info/dependency_links.txt\n'}
+[7.743101] (whitepost_robot) StdoutLine: {'line': b'writing entry points to ../../build/whitepost_robot/whitepost_robot.egg-info/entry_points.txt\n'}
+[7.745090] (whitepost_robot) StdoutLine: {'line': b'writing requirements to ../../build/whitepost_robot/whitepost_robot.egg-info/requires.txt\n'}
+[7.748482] (whitepost_robot) StdoutLine: {'line': b'writing top-level names to ../../build/whitepost_robot/whitepost_robot.egg-info/top_level.txt\n'}
+[7.766230] (whitepost_robot) StdoutLine: {'line': b"reading manifest file '../../build/whitepost_robot/whitepost_robot.egg-info/SOURCES.txt'\n"}
+[7.781489] (whitepost_robot) StdoutLine: {'line': b"writing manifest file '../../build/whitepost_robot/whitepost_robot.egg-info/SOURCES.txt'\n"}
+[7.782960] (-) TimerEvent: {}
+[7.783792] (whitepost_robot) StdoutLine: {'line': b'running build\n'}
+[7.784965] (whitepost_robot) StdoutLine: {'line': b'running build_py\n'}
+[7.794942] (whitepost_robot) StdoutLine: {'line': b'running install\n'}
+[7.797925] (whitepost_robot) StdoutLine: {'line': b'running install_lib\n'}
+[7.824116] (whitepost_robot) StdoutLine: {'line': b'running install_data\n'}
+[7.832853] (whitepost_robot) StdoutLine: {'line': b'running install_egg_info\n'}
+[7.849633] (whitepost_robot) StdoutLine: {'line': b"removing '/home/whitepost/ros2_ws/install/whitepost_robot/lib/python3.10/site-packages/whitepost_robot-0.0.0-py3.10.egg-info' (and everything under it)\n"}
+[7.854564] (whitepost_robot) StdoutLine: {'line': b'Copying ../../build/whitepost_robot/whitepost_robot.egg-info to /home/whitepost/ros2_ws/install/whitepost_robot/lib/python3.10/site-packages/whitepost_robot-0.0.0-py3.10.egg-info\n'}
+[7.873625] (whitepost_robot) StdoutLine: {'line': b'running install_scripts\n'}
+[7.883372] (-) TimerEvent: {}
+[7.984796] (-) TimerEvent: {}
+[8.067593] (whitepost_robot) StdoutLine: {'line': b'Installing esp32_drive_node script to /home/whitepost/ros2_ws/install/whitepost_robot/lib/whitepost_robot\n'}
+[8.072799] (whitepost_robot) StdoutLine: {'line': b'Installing esp32_sensor_node script to /home/whitepost/ros2_ws/install/whitepost_robot/lib/whitepost_robot\n'}
+[8.077442] (whitepost_robot) StdoutLine: {'line': b"writing list of installed files to '/home/whitepost/ros2_ws/build/whitepost_robot/install.log'\n"}
+[8.085224] (-) TimerEvent: {}
+[8.187044] (-) TimerEvent: {}
+[8.271545] (whitepost_robot) CommandEnded: {'returncode': 0}
+[8.287280] (-) TimerEvent: {}
+[8.389281] (-) TimerEvent: {}
+[8.433249] (whitepost_robot) JobEnded: {'identifier': 'whitepost_robot', 'rc': 0}
+[8.438910] (-) EventReactorShutdown: {}

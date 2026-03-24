@@ -1,0 +1,76 @@
+[0.000000] (-) TimerEvent: {}
+[0.001345] (whitepost_robot) JobQueued: {'identifier': 'whitepost_robot', 'dependencies': OrderedDict()}
+[0.001601] (whitepost_robot) JobStarted: {'identifier': 'whitepost_robot'}
+[0.097904] (-) TimerEvent: {}
+[0.198664] (-) TimerEvent: {}
+[0.299341] (-) TimerEvent: {}
+[0.400003] (-) TimerEvent: {}
+[0.500707] (-) TimerEvent: {}
+[0.601329] (-) TimerEvent: {}
+[0.701968] (-) TimerEvent: {}
+[0.802570] (-) TimerEvent: {}
+[0.903211] (-) TimerEvent: {}
+[1.003851] (-) TimerEvent: {}
+[1.104519] (-) TimerEvent: {}
+[1.205213] (-) TimerEvent: {}
+[1.305972] (-) TimerEvent: {}
+[1.406652] (-) TimerEvent: {}
+[1.507340] (-) TimerEvent: {}
+[1.608060] (-) TimerEvent: {}
+[1.708759] (-) TimerEvent: {}
+[1.809415] (-) TimerEvent: {}
+[1.910007] (-) TimerEvent: {}
+[2.010625] (-) TimerEvent: {}
+[2.111294] (-) TimerEvent: {}
+[2.211944] (-) TimerEvent: {}
+[2.312607] (-) TimerEvent: {}
+[2.413352] (-) TimerEvent: {}
+[2.514016] (-) TimerEvent: {}
+[2.614678] (-) TimerEvent: {}
+[2.715454] (-) TimerEvent: {}
+[2.816295] (-) TimerEvent: {}
+[2.917118] (-) TimerEvent: {}
+[3.017875] (-) TimerEvent: {}
+[3.118566] (-) TimerEvent: {}
+[3.219238] (-) TimerEvent: {}
+[3.319961] (-) TimerEvent: {}
+[3.420908] (-) TimerEvent: {}
+[3.488417] (whitepost_robot) Command: {'cmd': ['/usr/bin/python3', '-W', 'ignore:setup.py install is deprecated', '-W', 'ignore:easy_install command is deprecated', 'setup.py', 'egg_info', '--egg-base', '../../build/whitepost_robot', 'build', '--build-base', '/home/whitepost/ros2_ws/build/whitepost_robot/build', 'install', '--record', '/home/whitepost/ros2_ws/build/whitepost_robot/install.log', '--single-version-externally-managed', 'install_data'], 'cwd': '/home/whitepost/ros2_ws/src/whitepost_robot', 'env': {'LESSOPEN': '| /usr/bin/lesspipe %s', 'USER': 'whitepost', 'SSH_CLIENT': '192.168.1.10 39866 22', 'LC_TIME': 'C.UTF-8', 'XDG_SESSION_TYPE': 'tty', 'SHLVL': '2', 'LD_LIBRARY_PATH': '/opt/ros/humble/lib/aarch64-linux-gnu:/opt/ros/humble/lib', 'MOTD_SHOWN': 'pam', 'HOME': '/home/whitepost', 'OLDPWD': '/home/whitepost', 'SSH_TTY': '/dev/pts/0', 'ROS_PYTHON_VERSION': '3', 'LC_MONETARY': 'C.UTF-8', 'DBUS_SESSION_BUS_ADDRESS': 'unix:path=/run/user/1000/bus', 'ROS_DISTRO': 'humble', 'LOGNAME': 'whitepost', '_': '/usr/bin/colcon', 'ROS_VERSION': '2', 'XDG_SESSION_CLASS': 'user', 'TERM': 'xterm-256color', 'XDG_SESSION_ID': '1', 'ROS_LOCALHOST_ONLY': '0', 'PATH': '/opt/ros/humble/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin', 'LC_ADDRESS': 'C.UTF-8', 'XDG_RUNTIME_DIR': '/run/user/1000', 'LANG': 'C.UTF-8', 'LC_TELEPHONE': 'C.UTF-8', 'LS_COLORS': 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:', 'ROS_DOMAIN_ID': '22', 'AMENT_PREFIX_PATH': '/opt/ros/humble', 'SHELL': '/bin/bash', 'LC_NAME': 'C.UTF-8', 'LESSCLOSE': '/usr/bin/lesspipe %s %s', 'LC_MEASUREMENT': 'C.UTF-8', 'LC_IDENTIFICATION': 'C.UTF-8', 'PWD': '/home/whitepost/ros2_ws/build/whitepost_robot', 'SSH_CONNECTION': '192.168.1.10 39866 192.168.1.100 22', 'XDG_DATA_DIRS': '/usr/local/share:/usr/share:/var/lib/snapd/desktop', 'PYTHONPATH': '/home/whitepost/ros2_ws/build/whitepost_robot/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/whitepost/ros2_ws/install/whitepost_robot/lib/python3.10/site-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages', 'LC_NUMERIC': 'C.UTF-8', 'LC_PAPER': 'C.UTF-8', 'COLCON': '1'}, 'shell': False}
+[3.521045] (-) TimerEvent: {}
+[3.621677] (-) TimerEvent: {}
+[3.722314] (-) TimerEvent: {}
+[3.823018] (-) TimerEvent: {}
+[3.923706] (-) TimerEvent: {}
+[4.024361] (-) TimerEvent: {}
+[4.125018] (-) TimerEvent: {}
+[4.225615] (-) TimerEvent: {}
+[4.326211] (-) TimerEvent: {}
+[4.426849] (-) TimerEvent: {}
+[4.527489] (-) TimerEvent: {}
+[4.557017] (whitepost_robot) StdoutLine: {'line': b'running egg_info\n'}
+[4.559923] (whitepost_robot) StdoutLine: {'line': b'writing ../../build/whitepost_robot/whitepost_robot.egg-info/PKG-INFO\n'}
+[4.565247] (whitepost_robot) StdoutLine: {'line': b'writing dependency_links to ../../build/whitepost_robot/whitepost_robot.egg-info/dependency_links.txt\n'}
+[4.566204] (whitepost_robot) StdoutLine: {'line': b'writing entry points to ../../build/whitepost_robot/whitepost_robot.egg-info/entry_points.txt\n'}
+[4.566987] (whitepost_robot) StdoutLine: {'line': b'writing requirements to ../../build/whitepost_robot/whitepost_robot.egg-info/requires.txt\n'}
+[4.567568] (whitepost_robot) StdoutLine: {'line': b'writing top-level names to ../../build/whitepost_robot/whitepost_robot.egg-info/top_level.txt\n'}
+[4.579065] (whitepost_robot) StdoutLine: {'line': b"reading manifest file '../../build/whitepost_robot/whitepost_robot.egg-info/SOURCES.txt'\n"}
+[4.585128] (whitepost_robot) StdoutLine: {'line': b"writing manifest file '../../build/whitepost_robot/whitepost_robot.egg-info/SOURCES.txt'\n"}
+[4.585786] (whitepost_robot) StdoutLine: {'line': b'running build\n'}
+[4.586279] (whitepost_robot) StdoutLine: {'line': b'running build_py\n'}
+[4.592379] (whitepost_robot) StdoutLine: {'line': b'running install\n'}
+[4.593962] (whitepost_robot) StdoutLine: {'line': b'running install_lib\n'}
+[4.603869] (whitepost_robot) StdoutLine: {'line': b'running install_data\n'}
+[4.607738] (whitepost_robot) StdoutLine: {'line': b'running install_egg_info\n'}
+[4.616117] (whitepost_robot) StdoutLine: {'line': b"removing '/home/whitepost/ros2_ws/install/whitepost_robot/lib/python3.10/site-packages/whitepost_robot-0.0.0-py3.10.egg-info' (and everything under it)\n"}
+[4.618334] (whitepost_robot) StdoutLine: {'line': b'Copying ../../build/whitepost_robot/whitepost_robot.egg-info to /home/whitepost/ros2_ws/install/whitepost_robot/lib/python3.10/site-packages/whitepost_robot-0.0.0-py3.10.egg-info\n'}
+[4.627622] (-) TimerEvent: {}
+[4.629132] (whitepost_robot) StdoutLine: {'line': b'running install_scripts\n'}
+[4.717924] (whitepost_robot) StdoutLine: {'line': b'Installing esp32_drive_node script to /home/whitepost/ros2_ws/install/whitepost_robot/lib/whitepost_robot\n'}
+[4.721963] (whitepost_robot) StdoutLine: {'line': b'Installing esp32_sensor_node script to /home/whitepost/ros2_ws/install/whitepost_robot/lib/whitepost_robot\n'}
+[4.723992] (whitepost_robot) StdoutLine: {'line': b"writing list of installed files to '/home/whitepost/ros2_ws/build/whitepost_robot/install.log'\n"}
+[4.727961] (-) TimerEvent: {}
+[4.829490] (-) TimerEvent: {}
+[4.842482] (whitepost_robot) CommandEnded: {'returncode': 0}
+[4.929969] (whitepost_robot) JobEnded: {'identifier': 'whitepost_robot', 'rc': 0}
+[4.933219] (-) TimerEvent: {}
+[4.933575] (-) EventReactorShutdown: {}
