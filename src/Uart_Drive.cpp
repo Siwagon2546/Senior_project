@@ -11,8 +11,8 @@ BTS7960_t motor_L = { 22, 23, 255 };
 BTS7960_t motor_R = { 25, 26, 255 };
 Encoder_t encLeft, encRight;
 
-PID PIDMotorL(-255, 255, 200.0, 0.01, 10);
-PID PIDMotorR(-255, 255, 200.0, 0.01, 10);
+PID PIDMotorL(-255, 255, 700.0, 3.0, 30);
+PID PIDMotorR(-255, 255, 700.0, 3.0, 30);
 
 const float WHEEL_RADIUS  = 0.05;
 const float TRACK_WIDTH   = 0.37;

@@ -3,275 +3,193 @@
 #include <Adafruit_BNO08x.h>
 #include <Adafruit_BMP280.h>
 
+
 #define BNO08X_RX_PIN    16
 #define BNO08X_TX_PIN    17
 #define BNO08X_RESET_PIN 4
 
-Adafruit_BMP280    bmp;
-Adafruit_BNO08x    bno08x(BNO08X_RESET_PIN);
+Adafruit_BMP280 bmp;
+Adafruit_BNO08x bno08x(BNO08X_RESET_PIN);
+const int WDT_TIMEOUT_SECONDS = 3;
 
-// ==========================================
-// Binary payload structs
-// ==========================================
+// --- 🌟 โครงสร้าง Binary Payload ---
 #pragma pack(push, 1)
 struct ImuPayload {
-    uint8_t header1  = 0xAA;
-    uint8_t header2  = 0xBB;
-    uint8_t type     = 0x01;
+    uint8_t header1 = 0xAA;
+    uint8_t header2 = 0xBB;
+    uint8_t type = 0x01;
     float ax, ay, az;
     float gx, gy, gz;
     float qx, qy, qz, qw;
     uint8_t checksum;
-    // รวม: 3 + 10*4 + 1 = 44 bytes
 };
 
 struct BmpPayload {
-    uint8_t header1  = 0xAA;
-    uint8_t header2  = 0xBB;
-    uint8_t type     = 0x02;
+    uint8_t header1 = 0xAA;
+    uint8_t header2 = 0xBB;
+    uint8_t type = 0x02;
     float temp;
     float pressure;
     uint8_t checksum;
-    // รวม: 3 + 2*4 + 1 = 12 bytes
 };
 #pragma pack(pop)
 
-// ==========================================
-// Shared data
-// ==========================================
+// ตัวแปร Global สำหรับแชร์ระหว่าง Task
 ImuPayload sharedImuData;
 BmpPayload sharedBmpData;
-bool       newBmpDataFlag = false;
+bool newBmpDataFlag = false;
 
-// ✅ แก้ไข: ใช้ FreeRTOS Mutex แทน portMUX
-//    portMUX ปิด interrupt ทั้ง chip เหมาะกับ ISR เท่านั้น
-//    SemaphoreHandle_t ทำ context-switch ได้ ไม่บล็อก Core อื่น
-SemaphoreHandle_t dataMutex;
+// 🔒 Spinlock Mutex สำหรับป้องกัน Core 0 และ Core 1 แย่งกันอ่าน/เขียนข้อมูล
+portMUX_TYPE dataMux = portMUX_INITIALIZER_UNLOCKED;
 
-// ==========================================
-// Helper: คำนวณ XOR checksum ตั้งแต่ byte[2] จนถึง byte[len-2]
-// ==========================================
-static uint8_t calculateChecksum(uint8_t* ptr, size_t length) {
+uint8_t calculateChecksum(uint8_t* ptr, size_t length) {
     uint8_t sum = 0;
     for (size_t i = 2; i < length - 1; i++) sum ^= ptr[i];
     return sum;
 }
 
-// ==========================================
-// Helper: reinit BNO086 (ใช้ตอน recovery)
-// ==========================================
-static bool reinitBNO() {
-    if (!bno08x.begin_UART(&Serial2)) return false;
-    bno08x.enableReport(SH2_LINEAR_ACCELERATION,  5000);
-    bno08x.enableReport(SH2_GYROSCOPE_CALIBRATED, 5000);
-    bno08x.enableReport(SH2_ROTATION_VECTOR,      5000);
-    return true;
-}
-
-// ==========================================
-// TASK 1: อ่าน IMU (Core 1, Priority สูง)
-// ==========================================
+// ========================================================
+// 🛠️ TASK 1: อ่าน IMU (รันบน Core 1, Priority สูง)
+// ========================================================
 void ImuReadTask(void *pvParameters) {
     sh2_SensorValue_t sensorValue;
-
-    // นับ tick ที่ไม่มีข้อมูล เพื่อตรวจ sensor หลุด
-    int noDataCount = 0;
+    
+    // เอา Task นี้เข้าสู่ระบบ Watchdog
 
     while (1) {
-        bool gotData = false;
 
-        // ✅ แก้ไข: อ่าน UART *ข้างนอก* lock ทั้งหมด
-        //    getSensorEvent() ใช้เวลาอ่าน UART หลาย microsecond
-        //    ถ้าครอบด้วย lock จะบล็อก SerialTxTask บน Core 0
+        // กวาดข้อมูลจาก UART Buffer ให้เกลี้ยง
         while (bno08x.getSensorEvent(&sensorValue)) {
-            gotData = true;
-            noDataCount = 0;
-
-            // อ่านค่าออกมา local ก่อน (ยังไม่ต้อง lock)
+            // ล็อก Mutex ก่อนอัปเดตค่า ป้องกัน Core 0 ดึงไปตอนเขียนยังไม่เสร็จ
+            portENTER_CRITICAL(&dataMux);
             switch (sensorValue.sensorId) {
-
-                case SH2_LINEAR_ACCELERATION: {
-                    float ax = sensorValue.un.linearAcceleration.x;
-                    float ay = sensorValue.un.linearAcceleration.y;
-                    float az = sensorValue.un.linearAcceleration.z;
-                    // ✅ lock แค่ตอน copy เข้า shared struct (สั้นมาก)
-                    if (xSemaphoreTake(dataMutex, pdMS_TO_TICKS(2)) == pdTRUE) {
-                        sharedImuData.ax = ax;
-                        sharedImuData.ay = ay;
-                        sharedImuData.az = az;
-                        xSemaphoreGive(dataMutex);
-                    }
+                case SH2_LINEAR_ACCELERATION:
+                    sharedImuData.ax = sensorValue.un.linearAcceleration.x;
+                    sharedImuData.ay = sensorValue.un.linearAcceleration.y;
+                    sharedImuData.az = sensorValue.un.linearAcceleration.z;
                     break;
-                }
-
-                case SH2_GYROSCOPE_CALIBRATED: {
-                    float gx = sensorValue.un.gyroscope.x;
-                    float gy = sensorValue.un.gyroscope.y;
-                    float gz = sensorValue.un.gyroscope.z;
-                    if (xSemaphoreTake(dataMutex, pdMS_TO_TICKS(2)) == pdTRUE) {
-                        sharedImuData.gx = gx;
-                        sharedImuData.gy = gy;
-                        sharedImuData.gz = gz;
-                        xSemaphoreGive(dataMutex);
-                    }
+                case SH2_GYROSCOPE_CALIBRATED:
+                    sharedImuData.gx = sensorValue.un.gyroscope.x;
+                    sharedImuData.gy = sensorValue.un.gyroscope.y;
+                    sharedImuData.gz = sensorValue.un.gyroscope.z;
                     break;
-                }
-
-                case SH2_ROTATION_VECTOR: {
-                    float qx = sensorValue.un.rotationVector.i;
-                    float qy = sensorValue.un.rotationVector.j;
-                    float qz = sensorValue.un.rotationVector.k;
-                    float qw = sensorValue.un.rotationVector.real;
-                    if (xSemaphoreTake(dataMutex, pdMS_TO_TICKS(2)) == pdTRUE) {
-                        sharedImuData.qx = qx;
-                        sharedImuData.qy = qy;
-                        sharedImuData.qz = qz;
-                        sharedImuData.qw = qw;
-                        xSemaphoreGive(dataMutex);
-                    }
+                case SH2_ROTATION_VECTOR:
+                    sharedImuData.qx = sensorValue.un.rotationVector.i;
+                    sharedImuData.qy = sensorValue.un.rotationVector.j;
+                    sharedImuData.qz = sensorValue.un.rotationVector.k;
+                    sharedImuData.qw = sensorValue.un.rotationVector.real;
                     break;
-                }
             }
+            portEXIT_CRITICAL(&dataMux); // ปลดล็อก
         }
-
-        if (!gotData) noDataCount++;
-
-        // ✅ แก้ไข: Recovery — ถ้าไม่มีข้อมูล ~500ms ให้ reinit BNO086
-        //    แทนการ ESP.restart() ทั้ง chip
-        if (noDataCount > 500) {
-            noDataCount = 0;
-            Serial.println("DEBUG,BNO_TIMEOUT_REINIT");
-            reinitBNO();
-            vTaskDelay(pdMS_TO_TICKS(100));
-        }
-
-        vTaskDelay(pdMS_TO_TICKS(1));
+        // พัก Task 1ms ให้ CPU หายใจ
+        vTaskDelay(pdMS_TO_TICKS(1)); 
     }
 }
 
-// ==========================================
-// TASK 2: อ่าน BMP280 (Core 1, Priority ต่ำ)
-// ==========================================
+// ========================================================
+// 🛠️ TASK 2: อ่าน BMP280 (รันบน Core 1, Priority ต่ำ)
+// ========================================================
 void BmpReadTask(void *pvParameters) {
     TickType_t xLastWakeTime = xTaskGetTickCount();
-
+    
     while (1) {
-        // อ่าน I2C ข้างนอก lock (blocking I/O ไม่ควรอยู่ใน critical section)
         float t = bmp.readTemperature();
         float p = bmp.readPressure() / 100.0F;
 
-        if (xSemaphoreTake(dataMutex, pdMS_TO_TICKS(5)) == pdTRUE) {
-            sharedBmpData.temp     = t;
-            sharedBmpData.pressure = p;
-            newBmpDataFlag         = true;
-            xSemaphoreGive(dataMutex);
-        }
+        portENTER_CRITICAL(&dataMux);
+        sharedBmpData.temp = t;
+        sharedBmpData.pressure = p;
+        newBmpDataFlag = true; // แจ้ง Task ส่งข้อมูลว่ามีของใหม่
+        portEXIT_CRITICAL(&dataMux);
 
+        // สั่งให้ Task นี้ตื่นมาทำใหม่ทุกๆ 1 วินาทีเป๊ะๆ (1000ms)
         vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(1000));
     }
 }
 
-// ==========================================
-// TASK 3: ส่งข้อมูลผ่าน Serial (Core 0, 200 Hz)
-// ==========================================
+// ========================================================
+// 🛠️ TASK 3: ส่งข้อมูลผ่าน Serial (รันบน Core 0, 100Hz เป๊ะ)
+// ========================================================
 void SerialTxTask(void *pvParameters) {
-    TickType_t       xLastWakeTime = xTaskGetTickCount();
-    const TickType_t xFrequency    = pdMS_TO_TICKS(5); // 200 Hz
-
+    TickType_t xLastWakeTime = xTaskGetTickCount();
+    const TickType_t xFrequency = pdMS_TO_TICKS(5); // 10ms = 100Hz
+    
     ImuPayload localImu;
     BmpPayload localBmp;
-    bool       sendBmp  = false;
-
-    // Debug counter — พิมพ์ทุก 1 วินาทีเพื่อยืนยันว่า Task ยังทำงานอยู่
-    uint32_t txCount = 0;
+    bool sendBmp = false;
 
     while (1) {
-        txCount++;
-
-        // ก๊อปปี้ข้อมูลออกมาอย่างรวดเร็ว
-        if (xSemaphoreTake(dataMutex, pdMS_TO_TICKS(2)) == pdTRUE) {
-            localImu = sharedImuData;
-            if (newBmpDataFlag) {
-                localBmp      = sharedBmpData;
-                sendBmp       = true;
-                newBmpDataFlag = false;
-            }
-            xSemaphoreGive(dataMutex);
+        // 1. ก๊อปปี้ข้อมูลล่าสุดออกมาอย่างรวดเร็ว
+        portENTER_CRITICAL(&dataMux);
+        localImu = sharedImuData; 
+        if (newBmpDataFlag) {
+            localBmp = sharedBmpData;
+            sendBmp = true;
+            newBmpDataFlag = false;
         }
+        portEXIT_CRITICAL(&dataMux);
 
-        // คำนวณ checksum และส่ง IMU
+        // 2. คำนวณ Checksum และส่ง IMU
         localImu.checksum = calculateChecksum((uint8_t*)&localImu, sizeof(ImuPayload));
         Serial.write((uint8_t*)&localImu, sizeof(ImuPayload));
 
-        // ส่ง BMP ถ้าครบรอบ 1 วินาที
+        // 3. ถ้าครบรอบ 1 วิ ก็ส่ง BMP ต่อท้ายไปเลย
         if (sendBmp) {
             localBmp.checksum = calculateChecksum((uint8_t*)&localBmp, sizeof(BmpPayload));
             Serial.write((uint8_t*)&localBmp, sizeof(BmpPayload));
             sendBmp = false;
         }
 
-        // Debug heartbeat (ปิดได้ถ้า production)
-        if (txCount % 200 == 0) {
-            Serial.printf("DEBUG,TX_ALIVE,%lu\n", txCount);
-        }
-
+        // 4. บล็อก Task นี้ รอจนกว่าจะครบ 10ms (แม่นยำกว่า millis แบบเก่ามหาศาล)
         vTaskDelayUntil(&xLastWakeTime, xFrequency);
     }
 }
 
-// ==========================================
-// SETUP
-// ==========================================
+// ========================================================
+// ⚙️ SETUP
+// ========================================================
 void setup() {
     Serial.setTxBufferSize(1024);
-    Serial.begin(921600);
-    delay(500);
+    Serial.begin(921600); 
+    delay(1000);
 
-    Serial.println("DEBUG,BOOTING");
+    Serial.println("DEBUG,BOOTING_RTOS");
 
-    // ✅ แก้ไข: สร้าง Mutex ก่อน Task ทั้งหมด
-    dataMutex = xSemaphoreCreateMutex();
-    if (dataMutex == NULL) {
-        Serial.println("DEBUG,MUTEX_FAIL");
-        ESP.restart();
-    }
-
-    // Init I2C และ BMP280
     Wire.begin(21, 22);
     if (!bmp.begin(0x76)) {
         Serial.println("DEBUG,BMP_FAILED");
-        // ไม่ restart — ยังส่ง IMU ได้แม้ BMP เสีย
     }
-
-    // Init Serial2 สำหรับ BNO086
     Serial2.setRxBufferSize(2048);
+    
     Serial2.begin(3000000, SERIAL_8N1, BNO08X_RX_PIN, BNO08X_TX_PIN);
-
     Serial.println("DEBUG,INIT_BNO08X...");
-
+    
     int retry = 0;
-    while (!reinitBNO()) {
+    while (!bno08x.begin_UART(&Serial2)) {
         Serial.println("DEBUG,BNO08X_UART_RETRY");
         delay(500);
-        if (++retry > 10) {
-            Serial.println("DEBUG,BNO08X_FAIL_RESTART");
-            ESP.restart();
-        }
+        if(++retry > 10) ESP.restart();
     }
     Serial.println("DEBUG,BNO08X_OK");
 
-    // สร้าง Tasks
-    // Core 1: เซ็นเซอร์
+    bno08x.enableReport(SH2_LINEAR_ACCELERATION, 5000);  
+    bno08x.enableReport(SH2_GYROSCOPE_CALIBRATED, 5000); 
+    bno08x.enableReport(SH2_ROTATION_VECTOR, 5000);      
+
+
+    // --- สร้าง Tasks โยนลงแต่ละ Core ---
+    // Core 1: จัดการเซ็นเซอร์ทั้งหมด
     xTaskCreatePinnedToCore(ImuReadTask, "ImuTask", 4096, NULL, 3, NULL, 1);
     xTaskCreatePinnedToCore(BmpReadTask, "BmpTask", 2048, NULL, 1, NULL, 1);
-
-    // Core 0: ส่งข้อมูล
+    
+    // Core 0: จัดการการสื่อสาร (ไม่กวนเซ็นเซอร์)
     xTaskCreatePinnedToCore(SerialTxTask, "TxTask", 4096, NULL, 4, NULL, 0);
 
-    // ลบ Task loop() หลัก
+    // ลบ Task ของ Loop หลักทิ้งไปเลย เพราะเราใช้ RTOS แล้ว
     vTaskDelete(NULL);
 }
 
 void loop() {
-    // RTOS จัดการทั้งหมด — ไม่ใช้ loop()
+    // ปล่อยว่างไว้เลย RTOS จัดการหมดแล้ว
 }
