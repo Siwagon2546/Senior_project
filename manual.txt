@@ -1,0 +1,184 @@
+
+cd ${ISAAC_ROS_WS}/src/isaac_ros_common && \
+./scripts/run_dev.sh -d ${ISAAC_ROS_WS}
+
+sudo apt-get update
+rosdep update && rosdep install --from-paths ${ISAAC_ROS_WS}/src/isaac_ros_visual_slam/isaac_ros_visual_slam --ignore-src -y
+
+
+sudo apt-get update
+rosdep update && rosdep install -i -r --from-paths ${ISAAC_ROS_WS}/src/isaac_ros_nvblox/ --rosdistro humble -y
+
+cd /workspaces/isaac_ros-dev/ && \
+    colcon build --symlink-install --base-paths ${ISAAC_ROS_WS}/src/isaac_ros_nvblox/
+
+cd ${ISAAC_ROS_WS}/ && \
+   colcon build --symlink-install --packages-up-to isaac_ros_visual_slam --base-paths ${ISAAC_ROS_WS}/src/isaac_ros_visual_slam/isaac_ros_visual_slam
+
+cd ${ISAAC_ROS_WS}/src/isaac_ros_nvblox/nvblox_examples/realsense_splitter && \
+    git update-index --assume-unchanged COLCON_IGNORE && \
+    rm COLCON_IGNORE
+
+colcon build --packages-select robot_bringup --symlink-install
+
+
+source install/setup.bash
+colcon build --packages-select robot_bringup --symlink-install
+ros2 launch robot_bringup mapping.launch.py
+ros2 launch robot_bringup localization.launch.py
+ros2 launch robot_bringup localization_nav2.launch.py
+
+ros2 launch robot_bringup nav2_carter_style_quicktest.launch.py
+
+admin@swag-AORUS-5-SE:/workspaces/isaac_ros-dev$ ros2 run foxglove_bridge foxglove_bridge
+
+ros2 launch isaac_ros_visual_slam isaac_ros_visual_slam_realsense.launch.py
+
+ros2 launch nvblox_examples_bringup realsense_example.launch.py
+
+
+    rviz2 -d $(ros2 pkg prefix isaac_ros_visual_slam --share)/rviz/realsense.cfg.rviz
+
+ros2 service call /visual_slam/save_map isaac_ros_visual_slam_interfaces/srv/FilePath "{file_path: '/workspaces/isaac_ros-dev/maps/site_a_live/vslam_map1'}"
+ros2 service call /visual_slam/save_map isaac_ros_visual_slam_interfaces/srv/FilePath "{file_path: '/workspaces/isaac_ros-dev/maps/site_a_live/vslam_map2'}"
+
+#April tag test
+ros2 launch  isaac_ros_apriltag isaac_ros_apriltag_realsense.launch.py 
+
+
+ros2 action send_goal /navigate_to_pose nav2_msgs/action/NavigateToPose \
+"{pose: {header: {frame_id: map}, pose: {position: {x: 5.0, y: 0.0, z: 0.0}, orientation: {z: 0.0, w: 1.0}}}}"
+
+
+ros2 service call /visual_slam/localize_in_map isaac_ros_visual_slam_interfaces/srv/LocalizeInMap "{
+  map_folder_path: '/workspaces/isaac_ros-dev/maps/site_a_live/vslam_map1',
+  pose_hint: {
+    position: {x: 0, y: 0.48, z: 0.0},
+    orientation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}
+  }
+}"
+
+ros2 service call /visual_slam/localize_in_map isaac_ros_visual_slam_interfaces/srv/LocalizeInMap "{
+  map_folder_path: '/workspaces/isaac_ros-dev/maps/site_a_live/vslam_map5',
+  pose_hint: {
+    position: {x: 10.00, y: 0.33, z: 0.0},
+    orientation: {x: 0.0, y: 0.0, z: 0.00, w: 1.00}
+  }
+}"
+
+5mmm
+
+ros2 service call /visual_slam/localize_in_map isaac_ros_visual_slam_interfaces/srv/LocalizeInMap "{
+  map_folder_path: '/workspaces/isaac_ros-dev/maps/site_a_live/vslam_map5',
+  pose_hint: {
+    position: {x: 4.83, y: 0.42, z: 0.0},
+    orientation: {x: 0.0, y: 0.0, z: 0.00, w: 1.00}
+  }
+}"
+
+
+ros2 service call /visual_slam/localize_in_map isaac_ros_visual_slam_interfaces/srv/LocalizeInMap "{
+  map_folder_path: '/workspaces/isaac_ros-dev/maps/site_a_live/vslam_map5',
+  pose_hint: {
+    position: {x: 10.75, y: 0.61, z: 0.0},
+    orientation: {x: 0.0, y: 0.0, z: 0.00, w: 1.00}
+  }
+}"
+
+ros2 service call /visual_slam/localize_in_map isaac_ros_visual_slam_interfaces/srv/LocalizeInMap "{
+  map_folder_path: '/workspaces/isaac_ros-dev/maps/site_a_live/vslam_map5',
+  pose_hint: {
+    position: {x: 11.00, y: 10.00, z: 0.0},
+    orientation: {x: 0.0, y: 0.0, z: 0.00, w: 1.00}
+  }
+}"
+
+หน้าถังขยะ
+ros2 service call /visual_slam/localize_in_map isaac_ros_visual_slam_interfaces/srv/LocalizeInMap "{
+  map_folder_path: '/workspaces/isaac_ros-dev/maps/site_a_live/vslam_map5',
+  pose_hint: {
+    position: {x: 17.52, y: 11.0, z: 0.0},
+    orientation: {x: 0.0, y: 0.0, z: 0.00, w: 1.00}
+  }
+}"
+หน้า slope
+ros2 service call /visual_slam/localize_in_map isaac_ros_visual_slam_interfaces/srv/LocalizeInMap "{
+  map_folder_path: '/workspaces/isaac_ros-dev/maps/site_a_live/vslam_map5',
+  pose_hint: {
+    position: {x: 32.9, y: 13.7, z: 0.0},
+    orientation: {x: 0.0, y: 0.0, z: 0.00, w: 1.00}
+  }
+
+
+
+x: 4.74, y: 0.36, z: 0.0
+x: 9.61, y: 0.66, z: 0.0
+x: 14.52, y: 1.00, z: 0.0
+x: 19.32, y: 1.01, z: 0.0
+
+ros2 action send_goal /navigate_to_pose nav2_msgs/action/NavigateToPose \
+"{pose: {header: {frame_id: map}, pose: {position: {x: 4.74, y: 0.36, z: 0.0}, orientation: {z: 0.0, w: 1.0}}}}"
+
+ros2 action send_goal /navigate_to_pose nav2_msgs/action/NavigateToPose \
+"{pose: {header: {frame_id: map}, pose: {position: {x: 9.61, y: 0.66, z: 0.0}, orientation: {z: 0.0, w: 1.0}}}}"
+
+ros2 action send_goal /navigate_to_pose nav2_msgs/action/NavigateToPose \
+"{pose: {header: {frame_id: map}, pose: {position: {x: 14.52, y: 1.00, z: 0.0}, orientation: {z: 0.0, w: 1.0}}}}"
+
+ros2 action send_goal /navigate_to_pose nav2_msgs/action/NavigateToPose \
+"{pose: {header: {frame_id: map}, pose: {position: {x: 19.32, y: 1.01, z: 0.0}, orientation: {z: 0.0, w: 1.0}}}}"
+
+{header: {frame_id: map}, pose: {position: {x: 2.0, y: 0.46, z: 0.0}, orientation: {z: 0.0, w: 1.0}}},
+  {header: {frame_id: map}, pose: {position: {x: 4.0, y: 0.46, z: 0.0}, orientation: {z: 0.0, w: 1.0}}},
+  {header: {frame_id: map}, pose: {position: {x: 5.0, y: 0.58, z: 0.0}, orientation: {z: 0.0, w: 1.0}}},
+
+
+
+ros2 action send_goal /navigate_through_poses nav2_msgs/action/NavigateThroughPoses "{poses: [
+  {header: {frame_id: map}, pose: {position: {x: 2.0, y: 0.46, z: 0.0}, orientation: {z: 0.0, w: 1.0}}},
+  {header: {frame_id: map}, pose: {position: {x: 4.0, y: 0.46, z: 0.0}, orientation: {z: 0.0, w: 1.0}}},
+  {header: {frame_id: map}, pose: {position: {x: 5.0, y: 0.58, z: 0.0}, orientation: {z: 0.0, w: 1.0}}}
+]}"
+
+ros2 action send_goal /navigate_through_poses nav2_msgs/action/NavigateThroughPoses "{poses: [
+  {header: {frame_id: map}, pose: {position: {x: 7.0, y: 0.58, z: 0.0}, orientation: {z: 0.0, w: 1.0}}},
+  {header: {frame_id: map}, pose: {position: {x: 9.0, y: 0.58, z: 0.0}, orientation: {z: 0.0, w: 1.0}}},
+  {header: {frame_id: map}, pose: {position: {x: 10.0, y: 0.68, z: 0.0}, orientation: {z: 0.0, w: 1.0}}}
+]}"
+
+ros2 action send_goal /navigate_through_poses nav2_msgs/action/NavigateThroughPoses "{poses: [
+  {header: {frame_id: map}, pose: {position: {x: 12.0, y: 0.58, z: 0.0}, orientation: {z: 0.0, w: 1.0}}},
+  {header: {frame_id: map}, pose: {position: {x: 14.0, y: 0.68, z: 0.0}, orientation: {z: 0.0, w: 1.0}}},
+  {header: {frame_id: map}, pose: {position: {x: 15.0, y: 0.78, z: 0.0}, orientation: {z: 0.0, w: 1.0}}}
+]}"
+
+ros2 action send_goal /navigate_through_poses nav2_msgs/action/NavigateThroughPoses "{poses: [
+  {header: {frame_id: map}, pose: {position: {x: 17.0, y: 0.78, z: 0.0}, orientation: {z: 0.0, w: 1.0}}},
+  {header: {frame_id: map}, pose: {position: {x: 19.0, y: 0.88, z: 0.0}, orientation: {z: 0.0, w: 1.0}}},
+  {header: {frame_id: map}, pose: {position: {x: 20.0, y: 0.98, z: 0.0}, orientation: {z: 0.0, w: 1.0}}}
+]}"
+
+
+ros2 action send_goal /navigate_through_poses nav2_msgs/action/NavigateThroughPoses "{poses: [
+  {header: {frame_id: map}, pose: {position: {x: 2.0, y: 0.46, z: 0.0}, orientation: {z: 0.0, w: 1.0}}},
+  {header: {frame_id: map}, pose: {position: {x: 4.0, y: 0.46, z: 0.0}, orientation: {z: 0.0, w: 1.0}}},
+  {header: {frame_id: map}, pose: {position: {x: 5.0, y: 0.58, z: 0.0}, orientation: {z: 0.0, w: 1.0}}},
+  {header: {frame_id: map}, pose: {position: {x: 7.0, y: 0.58, z: 0.0}, orientation: {z: 0.0, w: 1.0}}},
+  {header: {frame_id: map}, pose: {position: {x: 9.0, y: 0.58, z: 0.0}, orientation: {z: 0.0, w: 1.0}}},
+  {header: {frame_id: map}, pose: {position: {x: 10.0, y: 0.68, z: 0.0}, orientation: {z: 0.0, w: 1.0}}}
+]}"
+
+ros2 action send_goal /navigate_through_poses nav2_msgs/action/NavigateThroughPoses "{poses: [
+  {header: {frame_id: map}, pose: {position: {x: 2.0, y: 0.46, z: 0.0}, orientation: {z: 0.0, w: 1.0}}},
+  {header: {frame_id: map}, pose: {position: {x: 4.0, y: 0.46, z: 0.0}, orientation: {z: 0.0, w: 1.0}}},
+  {header: {frame_id: map}, pose: {position: {x: 5.0, y: 0.58, z: 0.0}, orientation: {z: 0.0, w: 1.0}}},
+  {header: {frame_id: map}, pose: {position: {x: 7.0, y: 0.58, z: 0.0}, orientation: {z: 0.0, w: 1.0}}},
+  {header: {frame_id: map}, pose: {position: {x: 9.0, y: 0.58, z: 0.0}, orientation: {z: 0.0, w: 1.0}}},
+  {header: {frame_id: map}, pose: {position: {x: 10.0, y: 0.68, z: 0.0}, orientation: {z: 0.0, w: 1.0}}},
+  {header: {frame_id: map}, pose: {position: {x: 12.0, y: 0.58, z: 0.0}, orientation: {z: 0.0, w: 1.0}}},
+  {header: {frame_id: map}, pose: {position: {x: 14.0, y: 0.68, z: 0.0}, orientation: {z: 0.0, w: 1.0}}},
+  {header: {frame_id: map}, pose: {position: {x: 15.0, y: 0.78, z: 0.0}, orientation: {z: 0.0, w: 1.0}}},
+  {header: {frame_id: map}, pose: {position: {x: 17.0, y: 0.78, z: 0.0}, orientation: {z: 0.0, w: 1.0}}},
+  {header: {frame_id: map}, pose: {position: {x: 19.0, y: 0.88, z: 0.0}, orientation: {z: 0.0, w: 1.0}}},
+  {header: {frame_id: map}, pose: {position: {x: 20.0, y: 0.98, z: 0.0}, orientation: {z: 0.0, w: 1.0}}}
+]}"

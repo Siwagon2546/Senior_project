@@ -1,0 +1,3 @@
+admin@swag-AORUS-5-SE:/workspaces/isaac_ros-dev$ ros2 run isaac_mapping_ros create_map_offline.py \
+  --sensor_data_bag /workspaces/isaac_ros-dev/bags/mapping/site_a_map_02 \
+  --base_output_folder /workspaces/isaac_ros-dev/maps/site_a_offline_output --camera_topic_config /workspaces/isaac_ros-dev/camera_topic_config.yaml 
