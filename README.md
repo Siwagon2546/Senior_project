@@ -1,3 +1,27 @@
+# Autonomous Robot Localization and Navigation System (Localize-and-navigate)
+
+โปรเจกต์นี้เป็นส่วนหนึ่งของระบบนำทางและระบุตำแหน่งอัตโนมัติสำหรับหุ่นยนต์ (Autonomous Robot) โดยประยุกต์ใช้งานเทคโนโลยี **NVIDIA Isaac ROS** ร่วมกับกล้อง **Intel RealSense** เพื่อประมวลผลการคำนวณประสิทธิภาพสูงบนฮาร์ดแวร์ตระกูล NVIDIA Jetson หรือพีซีที่มี GPU สถาปัตยกรรมระดับสูง ระบบนี้เน้นไปที่การทำ Visual SLAM, การคำนวณความลึกด้วย AI (ESS Stereo Disparity) และการทำแผนที่ 3 มิติแบบ Real-time (nvblox)
+
+---
+
+## 🚀 ภาพรวมของระบบ (System Architecture)
+
+ระบบทำงานบนเฟรมเวิร์ก **ROS 2** โดยรวมทุกโหนดประมวลผลไว้ในตู้คอนเทนเนอร์เดียวกันแบบ Multi-Threaded (`component_container_mt`) เพื่อเปิดใช้งานระบบสื่อสารภายในกระบวนการเดียวกัน (**Intra-process Communications**) ช่วยลด Overhead ในการส่งข้อมูลภาพที่มีความละเอียดสูงได้อย่างมีประสิทธิภาพ
+
+### ส่วนประกอบหลักของระบบ (Core Components)
+1. **Sensor Input (`realsense2_camera`)**: ดึงข้อมูลภาพจากกล้องอินฟราเรดซ้าย-ขวา (Infra Stereo), ภาพสี (RGB) และข้อมูลการเคลื่อนไหว (IMU) จากกล้อง Intel RealSense
+2. **Image Pre-processing (`isaac_ros_image_proc`)**:
+   * แปลงฟอร์แมตภาพขาวดำ (Mono Infra) ให้เป็น `rgb8` เพื่อให้รองรับกับโมเดลโครงข่ายประสาทเทียม
+   * ย่อขนาดภาพให้เหลือ $960 \times 576$ พิกเซล ซึ่งเป็นมิติที่เหมาะสมที่สุดสำหรับโมเดล ESS 
+3. **AI Depth Estimation (`isaac_ros_ess`)**: ใช้โมเดล **ESS (Stereo Disparity DNN)** ของ NVIDIA เร่งความเร็วผ่าน TensorRT (`ess.engine`) เพื่อคำนวณความลึก (Disparity) จากภาพสเตอริโอคู่
+4. **Depth Filtering (`robot_bringup`)**: กรองสัญญาณรบกวนและเติมเต็มพิกเซลความลึกที่ขาดหายไปผ่านโหนดคัสตอม `RealtimeDepthFilterNode`
+5. **Visual SLAM (`isaac_ros_visual_slam`)**: ทำการฟิวชันข้อมูลภาพอินฟราเรดสเตอริโอกับ IMU (Visual-Inertial Odometry) เพื่อระบุตำแหน่งของหุ่นยนต์ ($x, y, z$ และ Orientation) แบบ Real-time พร้อมฟีเจอร์โหลดแผนที่เพื่อทำ Localization ณ ตอนเริ่มต้นทำงาน
+6. **3D Mapping (`nvblox_ros`)**: นำภาพความลึก (Depth) และภาพสี (Color) มาสร้างเป็นแผนที่ความละเอียดสูงแบบ 3 มิติ (TSDF Base) สำหรับใช้ในการวางแผนเส้นทางและหลบหลีกสิ่งกีดขวาง
+
+---
+
+## 📂 โครงสร้างการส่งข้อมูล (Data Flow & Remappings)
+
 ```mermaid
 graph TD
     %% Define Nodes and Styles
@@ -49,37 +73,7 @@ graph TD
     style VSLAM fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
     style ESS fill:#ffe0b2,stroke:#ef6c00,stroke-width:2px
     style NVBLOX fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
-## 🛠️ ความต้องการของระบบ (Prerequisites & Dependencies)
-
-* **OS:** Ubuntu 22.04 LTS (แนะนำ)
-* **Middleware:** ROS 2 (Humble / Iron / Jazzy)
-* **Environment:** NVIDIA Isaac ROS Dev Container (แนะนำ เพื่อความสะดวกในการติดตั้งไลบรารีของ NVIDIA)
-* **Hardware:** * กล้อง Intel RealSense (เช่น D435, D435i, D455)
-  * NVIDIA GPU (Jetson Orin Series หรือ RTX Desktop GPU)
-* **ROS 2 Packages:**
-  * `realsense2_camera`
-  * `isaac_ros_image_proc`
-  * `isaac_ros_ess`
-  * `isaac_ros_stereo_image_proc`
-  * `isaac_ros_visual_slam`
-  * `nvblox_ros`
-
----
-
-## ⚙️ พารามิเตอร์ที่สำคัญ (Key Configurations)
-
-พารามิเตอร์เหล่านี้ถูกกำหนดผ่าน Launch Arguments และสามารถปรับแต่งได้ในไฟล์ Launch:
-
-| พารามิเตอร์ | ค่าเริ่มต้น | คำอธิบาย |
-| :--- | :--- | :--- |
-| `camera_name` | `camera0` | ชื่อ Namespace ของกล้องที่จะใช้ในระบบ |
-| `config_file` | `realsense.yaml` | ไฟล์ตั้งค่าคุณสมบัติภายในของกล้อง RealSense |
-| `engine_file_path` | `ess.engine` | พาธไฟล์ TensorRT Engine ของโมเดลโครงข่ายประสาทเทียม ESS |
-| `threshold` | `0.0` | ค่าเกณฑ์ความเชื่อมั่นในการคำนวณ Disparity ของ ESS |
-| `load_map_folder_path` | `/workspaces/isaac_ros-dev/maps/...` | โฟลเดอร์แผนที่ VSLAM ที่บันทึกไว้ล่วงหน้าเพื่อทำ Localization ตอนเริ่มต้น |
-
----
-
+```
 ## 🚀 วิธีการสั่งงาน (Usage & Deployment)
 
 การรันระบบระบุตำแหน่งและนำทางสามารถเลือกใช้ได้ 2 รูปแบบตามลักษณะการประมวลผลของภาพความลึก:
