@@ -1,0 +1,12 @@
+ros2 launch robot_bringup White_poselocalize.launch.py 
+
+ros2 launch robot_bringup nav2_with_tf.launch.py 
+
+python3 nav2_follow_waypoints_client.py
+
+cd /workspaces/isaac_ros-dev/src/robot_bringup/scripts
+
+ros2 launch foxglove_bridge foxglove_bridge_launch.xml
+
+{"x": 40.58, "y": 17.12, "yaw": 111.0},
+    {"x": 40.11, "y": 18.19, "yaw": 111.0},

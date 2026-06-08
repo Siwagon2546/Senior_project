@@ -19,6 +19,8 @@ cd ${ISAAC_ROS_WS}/src/isaac_ros_nvblox/nvblox_examples/realsense_splitter && \
     git update-index --assume-unchanged COLCON_IGNORE && \
     rm COLCON_IGNORE
 
+sudo apt-get install -y ros-humble-isaac-ros-examples ros-humble-isaac-ros-realsense
+
 colcon build --packages-select robot_bringup --symlink-install
 
 
@@ -95,7 +97,7 @@ ros2 service call /visual_slam/localize_in_map isaac_ros_visual_slam_interfaces/
 
 หน้าถังขยะ
 ros2 service call /visual_slam/localize_in_map isaac_ros_visual_slam_interfaces/srv/LocalizeInMap "{
-  map_folder_path: '/workspaces/isaac_ros-dev/maps/site_a_live/vslam_map5',
+  map_folder_path: '/workspaces/isaac_ros-dev/maps/site_a_live/vslam_map6',
   pose_hint: {
     position: {x: 17.52, y: 11.0, z: 0.0},
     orientation: {x: 0.0, y: 0.0, z: 0.00, w: 1.00}
@@ -103,12 +105,29 @@ ros2 service call /visual_slam/localize_in_map isaac_ros_visual_slam_interfaces/
 }"
 หน้า slope
 ros2 service call /visual_slam/localize_in_map isaac_ros_visual_slam_interfaces/srv/LocalizeInMap "{
-  map_folder_path: '/workspaces/isaac_ros-dev/maps/site_a_live/vslam_map5',
+  map_folder_path: '/workspaces/isaac_ros-dev/maps/site_a_live/vslam_map6',
   pose_hint: {
     position: {x: 32.9, y: 13.7, z: 0.0},
     orientation: {x: 0.0, y: 0.0, z: 0.00, w: 1.00}
   }
+}"
+หลังจากลง Slope
+ros2 service call /visual_slam/localize_in_map isaac_ros_visual_slam_interfaces/srv/LocalizeInMap "{
+  map_folder_path: '/workspaces/isaac_ros-dev/maps/site_a_live/vslam_map6',
+  pose_hint: {
+    position: {x: 40.08, y: 17.96, z: 0.0},
+    orientation: {x: 0.0, y: 0.0, z: 0.00, w: 1.00}
+  }
+}"
 
+หน้า slope rtts
+ros2 service call /visual_slam/localize_in_map isaac_ros_visual_slam_interfaces/srv/LocalizeInMap "{
+  map_folder_path: '/workspaces/isaac_ros-dev/maps/site_a_live/vslam_map6',
+  pose_hint: {
+    position: {x: 15.88, y: 71.70, z: 0.0},
+    orientation: {x: 0.0, y: 0.0, z: 0.00, w: 1.00}
+  }
+}"
 
 
 x: 4.74, y: 0.36, z: 0.0
@@ -132,6 +151,10 @@ ros2 action send_goal /navigate_to_pose nav2_msgs/action/NavigateToPose \
   {header: {frame_id: map}, pose: {position: {x: 4.0, y: 0.46, z: 0.0}, orientation: {z: 0.0, w: 1.0}}},
   {header: {frame_id: map}, pose: {position: {x: 5.0, y: 0.58, z: 0.0}, orientation: {z: 0.0, w: 1.0}}},
 
+
+ros2 action send_goal /navigate_through_poses nav2_msgs/action/NavigateThroughPoses "{poses: [
+  {header: {frame_id: map}, pose: {position: {x: 1.0, y: 0.46, z: 0.0}, orientation: {z: 0.0, w: 1.0}}}
+]}"
 
 
 ros2 action send_goal /navigate_through_poses nav2_msgs/action/NavigateThroughPoses "{poses: [
@@ -182,3 +205,8 @@ ros2 action send_goal /navigate_through_poses nav2_msgs/action/NavigateThroughPo
   {header: {frame_id: map}, pose: {position: {x: 19.0, y: 0.88, z: 0.0}, orientation: {z: 0.0, w: 1.0}}},
   {header: {frame_id: map}, pose: {position: {x: 20.0, y: 0.98, z: 0.0}, orientation: {z: 0.0, w: 1.0}}}
 ]}"
+
+way point 14 point
+
+
+หน้า slope เส้นเหลือง x 41 y 15.66 

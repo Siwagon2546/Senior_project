@@ -16,7 +16,7 @@ def generate_launch_description():
     default_nav2_params = os.path.join(
         pkg_robot_bringup,
         'config',
-        'nav2_carter_style_fix.yaml'
+        'nav2_carter_style_smoothv2.yaml'
     )
 
     nav2_params_path = LaunchConfiguration('nav2_params_path')

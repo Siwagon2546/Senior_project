@@ -9,12 +9,17 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
+  <!-- C++ / Python dependencies -->
+  <depend>rclcpp</depend>
+  <depend>rclcpp_components</depend>
+  <depend>sensor_msgs</depend>
+  <depend>rclpy</depend>
+
+  <!-- Runtime packages used by launch files -->
   <exec_depend>isaac_ros_nvblox</exec_depend>
   <exec_depend>isaac_ros_visual_slam</exec_depend>
   <exec_depend>nav2_bringup</exec_depend>
   <exec_depend>realsense2_camera</exec_depend>
-  <exec_depend>rclpy</exec_depend>
-  <exec_depend>sensor_msgs</exec_depend>
 
   <export>
     <build_type>ament_cmake</build_type>

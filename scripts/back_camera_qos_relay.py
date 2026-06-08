@@ -5,20 +5,27 @@ from rclpy.qos import QoSProfile, ReliabilityPolicy, DurabilityPolicy, HistoryPo
 from sensor_msgs.msg import Image, CameraInfo
 
 
-class QosRelay(Node):
+class BackCameraQosRelay(Node):
     def __init__(self):
-        super().__init__('apriltag_qos_relay')
+        super().__init__('back_camera_qos_relay')
 
         image_in = self.declare_parameter(
-            'image_in', '/camera0/color/image_raw').get_parameter_value().string_value
-        camera_info_in = self.declare_parameter(
-            'camera_info_in', '/camera0/color/camera_info').get_parameter_value().string_value
-        image_out = self.declare_parameter(
-            'image_out', '/apriltag_bridge/image').get_parameter_value().string_value
-        camera_info_out = self.declare_parameter(
-            'camera_info_out', '/apriltag_bridge/camera_info').get_parameter_value().string_value
+            'image_in', '/camera_back/image_raw'
+        ).get_parameter_value().string_value
 
-        # subscribe เข้าจาก RealSense/Nvblox ฝั่ง sensor data
+        camera_info_in = self.declare_parameter(
+            'camera_info_in', '/camera_back/camera_info'
+        ).get_parameter_value().string_value
+
+        image_out = self.declare_parameter(
+            'image_out', '/apriltag_back_bridge/image'
+        ).get_parameter_value().string_value
+
+        camera_info_out = self.declare_parameter(
+            'camera_info_out', '/apriltag_back_bridge/camera_info'
+        ).get_parameter_value().string_value
+
+        # subscribe เข้าจากกล้องหลัง / Host publisher
         sub_qos = QoSProfile(
             reliability=ReliabilityPolicy.BEST_EFFORT,
             durability=DurabilityPolicy.VOLATILE,
@@ -26,7 +33,7 @@ class QosRelay(Node):
             depth=10,
         )
 
-        # publish ออกให้ apriltag แบบ reliable
+        # publish ออกให้ apriltag
         pub_qos = QoSProfile(
             reliability=ReliabilityPolicy.RELIABLE,
             durability=DurabilityPolicy.VOLATILE,
@@ -38,9 +45,12 @@ class QosRelay(Node):
         self.camera_info_pub = self.create_publisher(CameraInfo, camera_info_out, pub_qos)
 
         self.image_sub = self.create_subscription(
-            Image, image_in, self.image_cb, sub_qos)
+            Image, image_in, self.image_cb, sub_qos
+        )
+
         self.camera_info_sub = self.create_subscription(
-            CameraInfo, camera_info_in, self.camera_info_cb, sub_qos)
+            CameraInfo, camera_info_in, self.camera_info_cb, sub_qos
+        )
 
         self.get_logger().info(f'Image relay: {image_in} -> {image_out}')
         self.get_logger().info(f'CameraInfo relay: {camera_info_in} -> {camera_info_out}')
@@ -54,13 +64,16 @@ class QosRelay(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-    node = QosRelay()
+    node = BackCameraQosRelay()
+
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:
         pass
-    node.destroy_node()
-    rclpy.shutdown()
+    finally:
+        node.destroy_node()
+        if rclpy.ok():
+            rclpy.shutdown()
 
 
 if __name__ == '__main__':
